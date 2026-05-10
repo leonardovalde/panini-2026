@@ -89,6 +89,8 @@ const totalOwned = ownedSet.size;
     .sticker.missing { background: #1e293b; border-color: #334155; color: #475569; }
     .sticker.foil.owned   { background: linear-gradient(135deg, #854d0e, #ca8a04); border-color: #fbbf24; color: #fef9c3; }
     .sticker.foil.missing { background: #1c1917; border-color: #44403c; color: #57534e; }
+    .sticker.photo.owned   { background: #1e3a5f; border-color: #38bdf8; color: #bae6fd; }
+    .sticker.photo.missing { background: #0f1f33; border-color: #1e3a5f; color: #334155; }
   </style>
 </head>
 <body>
@@ -151,7 +153,7 @@ const totalOwned = ownedSet.size;
           <div class="sticker-grid">
             {t.stickers.map(s => (
               <div
-                class={`sticker ${s.foil ? 'foil' : ''} ${ownedSet.has(s.id) ? 'owned' : 'missing'}`}
+                class={`sticker ${s.foil ? 'foil' : s.name === 'Team Photo' ? 'photo' : ''} ${ownedSet.has(s.id) ? 'owned' : 'missing'}`}
                 data-id={s.id}
                 data-section={t.code}
                
