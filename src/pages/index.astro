@@ -9,12 +9,16 @@ const ownedSet = new Set(rows.filter(r => r.owned).map(r => r.id));
 const totalAll = rows.length;
 const totalOwned = ownedSet.size;
 
-// precompute per-team stats for heatmap
-const teamStats = TEAMS.map(t => {
-  const owned = t.stickers.filter(s => ownedSet.has(s.id)).length;
-  const pct = Math.round(owned / t.stickers.length * 100);
-  return { ...t, owned, total: t.stickers.length, pct };
-});
+// precompute per-section stats for heatmap
+const allSections = [
+  { code: 'intro', name: 'Introducción', flag: '🌍', stickers: INTRO },
+  ...TEAMS.map(t => ({ code: t.code, name: t.name, flag: t.flag, stickers: t.stickers })),
+  { code: 'museum', name: 'FIFA Museum', flag: '🏆', stickers: FIFA_MUSEUM },
+].map(s => {
+  const owned = s.stickers.filter(x => ownedSet.has(x.id)).length;
+  const pct = Math.round(owned / s.stickers.length * 100);
+  return { ...s, owned, total: s.stickers.length, pct };
+}).sort((a, b) => a.pct - b.pct);
 ---
 
 <html lang="es">
@@ -204,7 +208,7 @@ const teamStats = TEAMS.map(t => {
   <div id="view-heatmap">
     <main>
       <div class="heatmap-grid">
-        {teamStats.sort((a,b) => a.pct - b.pct).map(t => {
+        {allSections.map(t => {
           // color: 0%=red, 50%=orange, 100%=green
           const r = t.pct < 50 ? 255 : Math.round(255 - (t.pct - 50) * 5.1);
           const g = t.pct < 50 ? Math.round(t.pct * 5.1) : 255;
