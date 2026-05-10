@@ -128,8 +128,8 @@ const teamStats = TEAMS.map(t => {
   </header>
 
   <div class="tabs">
-    <div class="tab active" id="tab-stickers" onclick="switchTab('stickers')">🗂 Stickers</div>
-    <div class="tab" id="tab-heatmap" onclick="switchTab('heatmap')">🌡 Por país</div>
+    <div class="tab active" id="tab-stickers" data-tab="stickers">🗂 Stickers</div>
+    <div class="tab" id="tab-heatmap" data-tab="heatmap">🌡 Por país</div>
   </div>
 
   <!-- STICKERS VIEW -->
@@ -209,7 +209,7 @@ const teamStats = TEAMS.map(t => {
           const bg = `rgba(${r},${g},80,0.15)`;
           const fill = `rgb(${r},${g},80)`;
           return (
-            <div class="hm-card" style={`background:${bg}`} onclick={`switchTab('stickers');setTimeout(()=>{document.getElementById('${t.code}')?.scrollIntoView({behavior:'smooth'})},50)`}>
+            <div class="hm-card" style={`background:${bg}`} data-goto={t.code}>
               <div class="hm-top">
                 <span class="hm-flag">{t.flag}</span>
                 <span class="hm-name">{t.name}</span>
@@ -281,6 +281,17 @@ const teamStats = TEAMS.map(t => {
       document.getElementById('g-missing').textContent = totalAll - gOwned;
       document.getElementById('g-bar').style.width = `${(gOwned / totalAll * 100).toFixed(1)}%`;
     }
+
+    document.querySelectorAll('[data-tab]').forEach(el => {
+      el.addEventListener('click', () => switchTab(el.dataset.tab));
+    });
+
+    document.querySelectorAll('[data-goto]').forEach(el => {
+      el.addEventListener('click', () => {
+        switchTab('stickers');
+        setTimeout(() => document.getElementById(el.dataset.goto)?.scrollIntoView({ behavior: 'smooth' }), 50);
+      });
+    });
 
     document.querySelectorAll('.sticker').forEach(el => el.addEventListener('click', () => toggle(el)));
   </script>
