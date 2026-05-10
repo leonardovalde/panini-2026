@@ -1,17 +1,232 @@
 ---
+import { getPool, initDB } from '../lib/db';
+import { INTRO, FIFA_MUSEUM, TEAMS } from '../lib/stickers';
 
+await initDB();
+const { rows } = await getPool().query('SELECT id, owned FROM stickers');
+const ownedSet = new Set(rows.filter(r => r.owned).map(r => r.id));
+
+const totalAll = rows.length;
+const totalOwned = ownedSet.size;
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panini FIFA World Cup 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100dvh; -webkit-tap-highlight-color: transparent; }
+
+    header {
+      background: #0f172a;
+      padding: 0.75rem 1rem 0.6rem;
+      text-align: center;
+      border-bottom: 1px solid #1e293b;
+      position: sticky; top: 0; z-index: 100;
+    }
+    header h1 { font-size: 1rem; font-weight: 800; color: #f8fafc; }
+    .global-stats { display: flex; gap: 1rem; justify-content: center; margin-top: 0.3rem; font-size: 0.75rem; }
+    .global-stats span { color: #94a3b8; }
+    .global-stats strong { color: #38bdf8; }
+    .progress-bar { width: 100%; margin: 0.4rem auto 0; height: 4px; background: #1e293b; border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 2px; transition: width 0.3s; }
+
+    nav {
+      display: flex; overflow-x: auto; gap: 0.4rem; padding: 0.5rem 0.75rem;
+      background: #0f172a; border-bottom: 1px solid #1e293b;
+      position: sticky; top: 72px; z-index: 99;
+      scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
+    nav a {
+      flex-shrink: 0;
+      font-size: 0.72rem; padding: 0.3rem 0.6rem; border-radius: 20px;
+      background: #1e293b; color: #94a3b8; text-decoration: none;
+      white-space: nowrap; transition: background 0.15s;
+    }
+    nav a:active { background: #334155; color: #f1f5f9; }
+
+    main { padding: 0.75rem; }
+
+    .section { margin-bottom: 1.5rem; }
+    .section-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.5rem; padding-bottom: 0.35rem;
+      border-bottom: 1px solid #1e293b;
+    }
+    .section-header h2 { font-size: 0.9rem; font-weight: 700; }
+    .section-flag { font-size: 1.2rem; line-height: 1; }
+    .section-count { margin-left: auto; font-size: 0.7rem; color: #64748b; }
+    .section-count.complete { color: #4ade80; }
+
+    .sticker-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+    @media (min-width: 400px) { .sticker-grid { grid-template-columns: repeat(6, 1fr); } }
+    @media (min-width: 600px) { .sticker-grid { grid-template-columns: repeat(8, 1fr); } }
+    @media (min-width: 900px) { .sticker-grid { grid-template-columns: repeat(10, 1fr); } }
+
+    .sticker {
+      aspect-ratio: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border-radius: 8px; cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: transform 0.08s;
+      user-select: none;
+      padding: 3px;
+      touch-action: manipulation;
+    }
+    .sticker:active { transform: scale(0.92); }
+    .sticker .sid { font-size: 0.58rem; font-weight: 700; line-height: 1; }
+    .sticker .sname { font-size: 0.42rem; line-height: 1.15; text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 1px; }
+
+    .sticker.owned   { background: #166534; border-color: #4ade80; color: #bbf7d0; }
+    .sticker.missing { background: #1e293b; border-color: #334155; color: #475569; }
+    .sticker.foil.owned   { background: linear-gradient(135deg, #854d0e, #ca8a04); border-color: #fbbf24; color: #fef9c3; }
+    .sticker.foil.missing { background: #1c1917; border-color: #44403c; color: #57534e; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚽ Panini FIFA World Cup 2026™</h1>
+    <div class="global-stats">
+      <span>Tengo: <strong id="g-owned">{totalOwned}</strong></span>
+      <span>Faltan: <strong id="g-missing">{totalAll - totalOwned}</strong></span>
+      <span>Total: <strong>{totalAll}</strong></span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="g-bar" style={`width:${(totalOwned/totalAll*100).toFixed(1)}%`}></div>
+    </div>
+  </header>
+
+  <nav>
+    <a href="#intro">Intro</a>
+    {TEAMS.map(t => <a href={`#${t.code}`}>{t.flag} {t.name}</a>)}
+    <a href="#museum">FIFA Museum</a>
+  </nav>
+
+  <main>
+    <!-- INTRO -->
+    <div class="section" id="intro">
+      <div class="section-header">
+        <span class="section-flag">🌍</span>
+        <h2>Introducción</h2>
+        <span class="section-count" id="cnt-intro">
+          {INTRO.filter(s => ownedSet.has(s.id)).length}/{INTRO.length}
+        </span>
+      </div>
+      <div class="sticker-grid">
+        {INTRO.map(s => (
+          <div
+            class={`sticker foil ${ownedSet.has(s.id) ? 'owned' : 'missing'}`}
+            data-id={s.id}
+            data-section="intro"
+           
+            title={`${s.id} - ${s.name}`}
+          >
+            <span class="sid">{s.id}</span>
+            <span class="sname">{s.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- TEAMS -->
+    {TEAMS.map(t => {
+      const teamOwned = t.stickers.filter(s => ownedSet.has(s.id)).length;
+      return (
+        <div class="section" id={t.code}>
+          <div class="section-header">
+            <span class="section-flag">{t.flag}</span>
+            <h2>{t.name}</h2>
+            <span class={`section-count ${teamOwned === t.stickers.length ? 'complete' : ''}`} id={`cnt-${t.code}`}>
+              {teamOwned}/{t.stickers.length}
+            </span>
+          </div>
+          <div class="sticker-grid">
+            {t.stickers.map(s => (
+              <div
+                class={`sticker ${s.foil ? 'foil' : ''} ${ownedSet.has(s.id) ? 'owned' : 'missing'}`}
+                data-id={s.id}
+                data-section={t.code}
+               
+                title={`${s.id} - ${s.name}`}
+              >
+                <span class="sid">{s.id}</span>
+                <span class="sname">{s.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+
+    <!-- FIFA MUSEUM -->
+    <div class="section" id="museum">
+      <div class="section-header">
+        <span class="section-flag">🏆</span>
+        <h2>FIFA Museum</h2>
+        <span class="section-count" id="cnt-museum">
+          {FIFA_MUSEUM.filter(s => ownedSet.has(s.id)).length}/{FIFA_MUSEUM.length}
+        </span>
+      </div>
+      <div class="sticker-grid">
+        {FIFA_MUSEUM.map(s => (
+          <div
+            class={`sticker foil ${ownedSet.has(s.id) ? 'owned' : 'missing'}`}
+            data-id={s.id}
+            data-section="museum"
+           
+            title={`${s.id} - ${s.name}`}
+          >
+            <span class="sid">{s.id}</span>
+            <span class="sname">{s.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const totalAll = document.querySelectorAll('.sticker').length;
+
+    async function toggle(el) {
+      const id = el.dataset.id;
+      const section = el.dataset.section;
+      const newOwned = !el.classList.contains('owned');
+
+      await fetch('/api/sticker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, owned: newOwned }),
+      });
+
+      el.classList.toggle('owned', newOwned);
+      el.classList.toggle('missing', !newOwned);
+
+      const grid = el.closest('.sticker-grid');
+      const sectionOwned = grid.querySelectorAll('.sticker.owned').length;
+      const sectionTotal = grid.querySelectorAll('.sticker').length;
+      const cnt = document.getElementById(`cnt-${section}`);
+      if (cnt) {
+        cnt.textContent = `${sectionOwned}/${sectionTotal}`;
+        cnt.classList.toggle('complete', sectionOwned === sectionTotal);
+      }
+
+      const gOwned = document.querySelectorAll('.sticker.owned').length;
+      document.getElementById('g-owned').textContent = gOwned;
+      document.getElementById('g-missing').textContent = totalAll - gOwned;
+      document.getElementById('g-bar').style.width = `${(gOwned / totalAll * 100).toFixed(1)}%`;
+    }
+
+    document.querySelectorAll('.sticker').forEach(el => {
+      el.addEventListener('click', () => toggle(el));
+    });
+  </script>
+</body>
 </html>
