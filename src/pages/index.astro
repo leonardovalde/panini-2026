@@ -18,7 +18,7 @@ const allSections = [
   const owned = s.stickers.filter(x => ownedSet.has(x.id)).length;
   const pct = Math.round(owned / s.stickers.length * 100);
   return { ...s, owned, total: s.stickers.length, pct };
-}).sort((a, b) => a.pct - b.pct);
+});
 ---
 
 <html lang="es">
