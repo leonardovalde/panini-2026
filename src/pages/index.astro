@@ -8,98 +8,115 @@ const ownedSet = new Set(rows.filter(r => r.owned).map(r => r.id));
 
 const totalAll = rows.length;
 const totalOwned = ownedSet.size;
+
+// precompute per-team stats for heatmap
+const teamStats = TEAMS.map(t => {
+  const owned = t.stickers.filter(s => ownedSet.has(s.id)).length;
+  const pct = Math.round(owned / t.stickers.length * 100);
+  return { ...t, owned, total: t.stickers.length, pct };
+});
 ---
 
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Panini FIFA World Cup 2026</title>
+  <title>Álbum Leo & Gabi 2026</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #fdf4ff; color: #3b1f4e; min-height: 100dvh; -webkit-tap-highlight-color: transparent; }
+    body { font-family: system-ui, sans-serif; background: #f8f9fa; color: #2d3748; min-height: 100dvh; -webkit-tap-highlight-color: transparent; }
 
     header {
-      background: linear-gradient(135deg, #a855f7, #ec4899);
-      padding: 0.75rem 1rem 0.6rem;
+      background: #fff;
+      padding: 0.7rem 1rem 0.5rem;
       text-align: center;
-      border-bottom: 1px solid #d946ef;
+      border-bottom: 1px solid #e2e8f0;
       position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
-    header h1 { font-size: 1rem; font-weight: 800; color: #fff; }
-    header p { font-size: 0.7rem; color: #fce7f3; margin-top: 0.1rem; }
-    .global-stats { display: flex; gap: 1rem; justify-content: center; margin-top: 0.3rem; font-size: 0.75rem; }
-    .global-stats span { color: #fce7f3; }
-    .global-stats strong { color: #fff; }
-    .progress-bar { width: 100%; margin: 0.4rem auto 0; height: 5px; background: rgba(255,255,255,0.3); border-radius: 3px; overflow: hidden; }
-    .progress-fill { height: 100%; background: #fff; border-radius: 3px; transition: width 0.3s; }
+    header h1 { font-size: 1rem; font-weight: 800; color: #4a5568; }
+    header p { font-size: 0.68rem; color: #a0aec0; margin-top: 0.1rem; }
+    .logout { position: absolute; top: 0.6rem; right: 0.75rem; font-size: 0.68rem; color: #a0aec0; text-decoration: none; }
+    .global-stats { display: flex; gap: 1rem; justify-content: center; margin-top: 0.3rem; font-size: 0.72rem; color: #718096; }
+    .global-stats strong { color: #4a5568; }
+    .progress-bar { width: 100%; margin: 0.35rem auto 0; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #68d391, #4299e1); border-radius: 2px; transition: width 0.3s; }
 
+    /* tabs */
+    .tabs { display: flex; background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 82px; z-index: 99; }
+    .tab { flex: 1; padding: 0.55rem; text-align: center; font-size: 0.78rem; font-weight: 600; color: #a0aec0; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .tab.active { color: #4299e1; border-bottom-color: #4299e1; }
+
+    /* nav (stickers view) */
     nav {
-      display: flex; overflow-x: auto; gap: 0.4rem; padding: 0.5rem 0.75rem;
-      background: #fdf4ff; border-bottom: 1px solid #f0abfc;
-      position: sticky; top: 80px; z-index: 99;
+      display: flex; overflow-x: auto; gap: 0.4rem; padding: 0.45rem 0.75rem;
+      background: #f8f9fa; border-bottom: 1px solid #e2e8f0;
       scrollbar-width: none;
     }
     nav::-webkit-scrollbar { display: none; }
     nav a {
-      flex-shrink: 0;
-      font-size: 0.72rem; padding: 0.3rem 0.6rem; border-radius: 20px;
-      background: #f3e8ff; color: #7e22ce; text-decoration: none;
-      white-space: nowrap; transition: background 0.15s;
-      border: 1px solid #e9d5ff;
+      flex-shrink: 0; font-size: 0.68rem; padding: 0.25rem 0.55rem; border-radius: 20px;
+      background: #edf2f7; color: #4a5568; text-decoration: none; white-space: nowrap;
+      border: 1px solid #e2e8f0;
     }
-    nav a:active { background: #e9d5ff; }
+    nav a:active { background: #e2e8f0; }
 
     main { padding: 0.75rem; }
 
-    .section { margin-bottom: 1.5rem; scroll-margin-top: 120px; }
-    .section-header {
-      display: flex; align-items: center; gap: 0.5rem;
-      margin-bottom: 0.5rem; padding-bottom: 0.35rem;
-      border-bottom: 1px solid #f0abfc;
-    }
-    .section-header h2 { font-size: 0.9rem; font-weight: 700; color: #6b21a8; }
+    /* sticker sections */
+    .section { margin-bottom: 1.5rem; scroll-margin-top: 150px; }
+    .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid #e2e8f0; }
+    .section-header h2 { font-size: 0.88rem; font-weight: 700; color: #2d3748; }
     .section-flag { font-size: 1.2rem; line-height: 1; }
-    .section-count { margin-left: auto; font-size: 0.7rem; color: #a855f7; }
-    .section-count.complete { color: #16a34a; font-weight: 700; }
+    .section-count { margin-left: auto; font-size: 0.68rem; color: #a0aec0; }
+    .section-count.complete { color: #48bb78; font-weight: 700; }
 
-    .sticker-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 4px;
-    }
+    .sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
     @media (min-width: 400px) { .sticker-grid { grid-template-columns: repeat(6, 1fr); } }
     @media (min-width: 600px) { .sticker-grid { grid-template-columns: repeat(8, 1fr); } }
-    @media (min-width: 900px) { .sticker-grid { grid-template-columns: repeat(10, 1fr); } }
 
     .sticker {
-      aspect-ratio: 1;
-      display: flex; flex-direction: column;
+      aspect-ratio: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      border-radius: 8px; cursor: pointer;
-      border: 1.5px solid transparent;
-      transition: transform 0.08s;
-      user-select: none;
-      padding: 3px;
-      touch-action: manipulation;
+      border-radius: 7px; cursor: pointer; border: 1.5px solid transparent;
+      transition: transform 0.08s; user-select: none; padding: 3px; touch-action: manipulation;
     }
-    .sticker:active { transform: scale(0.92); }
-    .sticker .sid { font-size: 0.58rem; font-weight: 700; line-height: 1; }
-    .sticker .sname { font-size: 0.42rem; line-height: 1.15; text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 1px; }
+    .sticker:active { transform: scale(0.91); }
+    .sticker .sid { font-size: 0.56rem; font-weight: 700; line-height: 1; }
+    .sticker .sname { font-size: 0.4rem; line-height: 1.15; text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 1px; }
 
-    .sticker.owned   { background: #d1fae5; border-color: #34d399; color: #065f46; }
-    .sticker.missing { background: #f3e8ff; border-color: #d8b4fe; color: #c084fc; }
-    .sticker.foil.owned   { background: linear-gradient(135deg, #fef08a, #fbbf24); border-color: #f59e0b; color: #78350f; }
-    .sticker.foil.missing { background: #fefce8; border-color: #fde68a; color: #d97706; }
-    .sticker.photo.owned   { background: #dbeafe; border-color: #60a5fa; color: #1e40af; }
-    .sticker.photo.missing { background: #eff6ff; border-color: #bfdbfe; color: #93c5fd; }
+    .sticker.owned   { background: #c6f6d5; border-color: #68d391; color: #276749; }
+    .sticker.missing { background: #edf2f7; border-color: #cbd5e0; color: #a0aec0; }
+    .sticker.foil.owned   { background: linear-gradient(135deg, #fefcbf, #f6e05e); border-color: #ecc94b; color: #744210; }
+    .sticker.foil.missing { background: #fffff0; border-color: #faf089; color: #b7791f; }
+    .sticker.photo.owned   { background: #bee3f8; border-color: #63b3ed; color: #2a4365; }
+    .sticker.photo.missing { background: #ebf8ff; border-color: #bee3f8; color: #90cdf4; }
+
+    /* heatmap view */
+    #view-heatmap { display: none; }
+    .heatmap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    @media (min-width: 500px) { .heatmap-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 700px) { .heatmap-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .hm-card {
+      border-radius: 10px; padding: 0.6rem 0.5rem 0.5rem;
+      display: flex; flex-direction: column; gap: 0.3rem;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    .hm-top { display: flex; align-items: center; gap: 0.4rem; }
+    .hm-flag { font-size: 1.3rem; line-height: 1; }
+    .hm-name { font-size: 0.7rem; font-weight: 700; color: #2d3748; line-height: 1.2; }
+    .hm-pct { margin-left: auto; font-size: 0.75rem; font-weight: 800; }
+    .hm-bar { height: 5px; border-radius: 3px; background: rgba(0,0,0,0.08); overflow: hidden; }
+    .hm-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+    .hm-count { font-size: 0.6rem; color: #718096; }
   </style>
 </head>
 <body>
   <header>
-    <h1>💜 Álbum de Leo & Gabi 💜</h1>
-    <p>⚽ Panini FIFA World Cup 2026™ 🌍</p>
-    <a href="/api/logout" style="position:absolute;top:0.6rem;right:0.75rem;font-size:0.7rem;color:#fce7f3;text-decoration:none;opacity:0.7;">salir</a>
+    <a href="/api/logout" class="logout">salir</a>
+    <h1>✨ Álbum de Leo & Gabi ✨</h1>
+    <p>⚽ Panini FIFA World Cup 2026™</p>
     <div class="global-stats">
       <span>Tengo: <strong id="g-owned">{totalOwned}</strong></span>
       <span>Faltan: <strong id="g-missing">{totalAll - totalOwned}</strong></span>
@@ -110,96 +127,118 @@ const totalOwned = ownedSet.size;
     </div>
   </header>
 
-  <nav>
-    <a href="#intro">Intro</a>
-    {TEAMS.map(t => <a href={`#${t.code}`}>{t.flag} {t.name}</a>)}
-    <a href="#museum">FIFA Museum</a>
-  </nav>
+  <div class="tabs">
+    <div class="tab active" id="tab-stickers" onclick="switchTab('stickers')">🗂 Stickers</div>
+    <div class="tab" id="tab-heatmap" onclick="switchTab('heatmap')">🌡 Por país</div>
+  </div>
 
-  <main>
-    <!-- INTRO -->
-    <div class="section" id="intro">
-      <div class="section-header">
-        <span class="section-flag">🌍</span>
-        <h2>Introducción</h2>
-        <span class="section-count" id="cnt-intro">
-          {INTRO.filter(s => ownedSet.has(s.id)).length}/{INTRO.length}
-        </span>
-      </div>
-      <div class="sticker-grid">
-        {INTRO.map(s => (
-          <div
-            class={`sticker foil ${ownedSet.has(s.id) ? 'owned' : 'missing'}`}
-            data-id={s.id}
-            data-section="intro"
-           
-            title={`${s.id} - ${s.name}`}
-          >
-            <span class="sid">{s.id}</span>
-            <span class="sname">{s.name}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    <!-- TEAMS -->
-    {TEAMS.map(t => {
-      const teamOwned = t.stickers.filter(s => ownedSet.has(s.id)).length;
-      return (
-        <div class="section" id={t.code}>
-          <div class="section-header">
-            <span class="section-flag">{t.flag}</span>
-            <h2>{t.name}</h2>
-            <span class={`section-count ${teamOwned === t.stickers.length ? 'complete' : ''}`} id={`cnt-${t.code}`}>
-              {teamOwned}/{t.stickers.length}
-            </span>
-          </div>
-          <div class="sticker-grid">
-            {t.stickers.map(s => (
-              <div
-                class={`sticker ${s.foil ? 'foil' : s.name === 'Team Photo' ? 'photo' : ''} ${ownedSet.has(s.id) ? 'owned' : 'missing'}`}
-                data-id={s.id}
-                data-section={t.code}
-               
-                title={`${s.id} - ${s.name}`}
-              >
-                <span class="sid">{s.id}</span>
-                <span class="sname">{s.name}</span>
-              </div>
-            ))}
-          </div>
+  <!-- STICKERS VIEW -->
+  <div id="view-stickers">
+    <nav>
+      <a href="#intro">Intro</a>
+      {TEAMS.map(t => <a href={`#${t.code}`}>{t.flag} {t.name}</a>)}
+      <a href="#museum">Museum</a>
+    </nav>
+    <main>
+      <div class="section" id="intro">
+        <div class="section-header">
+          <span class="section-flag">🌍</span>
+          <h2>Introducción</h2>
+          <span class="section-count" id="cnt-intro">{INTRO.filter(s => ownedSet.has(s.id)).length}/{INTRO.length}</span>
         </div>
-      );
-    })}
+        <div class="sticker-grid">
+          {INTRO.map(s => (
+            <div class={`sticker foil ${ownedSet.has(s.id) ? 'owned' : 'missing'}`} data-id={s.id} data-section="intro" title={`${s.id} - ${s.name}`}>
+              <span class="sid">{s.id}</span>
+              <span class="sname">{s.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
-    <!-- FIFA MUSEUM -->
-    <div class="section" id="museum">
-      <div class="section-header">
-        <span class="section-flag">🏆</span>
-        <h2>FIFA Museum</h2>
-        <span class="section-count" id="cnt-museum">
-          {FIFA_MUSEUM.filter(s => ownedSet.has(s.id)).length}/{FIFA_MUSEUM.length}
-        </span>
-      </div>
-      <div class="sticker-grid">
-        {FIFA_MUSEUM.map(s => (
-          <div
-            class={`sticker foil ${ownedSet.has(s.id) ? 'owned' : 'missing'}`}
-            data-id={s.id}
-            data-section="museum"
-           
-            title={`${s.id} - ${s.name}`}
-          >
-            <span class="sid">{s.id}</span>
-            <span class="sname">{s.name}</span>
+      {TEAMS.map(t => {
+        const teamOwned = t.stickers.filter(s => ownedSet.has(s.id)).length;
+        return (
+          <div class="section" id={t.code}>
+            <div class="section-header">
+              <span class="section-flag">{t.flag}</span>
+              <h2>{t.name}</h2>
+              <span class={`section-count ${teamOwned === t.stickers.length ? 'complete' : ''}`} id={`cnt-${t.code}`}>{teamOwned}/{t.stickers.length}</span>
+            </div>
+            <div class="sticker-grid">
+              {t.stickers.map(s => (
+                <div
+                  class={`sticker ${s.foil ? 'foil' : s.name === 'Team Photo' ? 'photo' : ''} ${ownedSet.has(s.id) ? 'owned' : 'missing'}`}
+                  data-id={s.id} data-section={t.code} title={`${s.id} - ${s.name}`}
+                >
+                  <span class="sid">{s.id}</span>
+                  <span class="sname">{s.name}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+        );
+      })}
+
+      <div class="section" id="museum">
+        <div class="section-header">
+          <span class="section-flag">🏆</span>
+          <h2>FIFA Museum</h2>
+          <span class="section-count" id="cnt-museum">{FIFA_MUSEUM.filter(s => ownedSet.has(s.id)).length}/{FIFA_MUSEUM.length}</span>
+        </div>
+        <div class="sticker-grid">
+          {FIFA_MUSEUM.map(s => (
+            <div class={`sticker foil ${ownedSet.has(s.id) ? 'owned' : 'missing'}`} data-id={s.id} data-section="museum" title={`${s.id} - ${s.name}`}>
+              <span class="sid">{s.id}</span>
+              <span class="sname">{s.name}</span>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </div>
+
+  <!-- HEATMAP VIEW -->
+  <div id="view-heatmap">
+    <main>
+      <div class="heatmap-grid">
+        {teamStats.sort((a,b) => a.pct - b.pct).map(t => {
+          // color: 0%=red, 50%=orange, 100%=green
+          const r = t.pct < 50 ? 255 : Math.round(255 - (t.pct - 50) * 5.1);
+          const g = t.pct < 50 ? Math.round(t.pct * 5.1) : 255;
+          const bg = `rgba(${r},${g},80,0.15)`;
+          const fill = `rgb(${r},${g},80)`;
+          return (
+            <div class="hm-card" style={`background:${bg}`} onclick={`switchTab('stickers');setTimeout(()=>{document.getElementById('${t.code}')?.scrollIntoView({behavior:'smooth'})},50)`}>
+              <div class="hm-top">
+                <span class="hm-flag">{t.flag}</span>
+                <span class="hm-name">{t.name}</span>
+                <span class="hm-pct" style={`color:${fill}`}>{t.pct}%</span>
+              </div>
+              <div class="hm-bar"><div class="hm-fill" id={`hm-${t.code}`} style={`width:${t.pct}%;background:${fill}`}></div></div>
+              <span class="hm-count" id={`hmc-${t.code}`}>{t.owned}/{t.total} figuritas</span>
+            </div>
+          );
+        })}
+      </div>
+    </main>
+  </div>
 
   <script>
     const totalAll = document.querySelectorAll('.sticker').length;
+
+    function switchTab(tab) {
+      document.getElementById('view-stickers').style.display = tab === 'stickers' ? '' : 'none';
+      document.getElementById('view-heatmap').style.display  = tab === 'heatmap'  ? '' : 'none';
+      document.getElementById('tab-stickers').classList.toggle('active', tab === 'stickers');
+      document.getElementById('tab-heatmap').classList.toggle('active',  tab === 'heatmap');
+    }
+
+    function heatColor(pct) {
+      const r = pct < 50 ? 255 : Math.round(255 - (pct - 50) * 5.1);
+      const g = pct < 50 ? Math.round(pct * 5.1) : 255;
+      return { fill: `rgb(${r},${g},80)`, bg: `rgba(${r},${g},80,0.15)` };
+    }
 
     async function toggle(el) {
       const id = el.dataset.id;
@@ -215,24 +254,35 @@ const totalOwned = ownedSet.size;
       el.classList.toggle('owned', newOwned);
       el.classList.toggle('missing', !newOwned);
 
+      // section counter
       const grid = el.closest('.sticker-grid');
-      const sectionOwned = grid.querySelectorAll('.sticker.owned').length;
-      const sectionTotal = grid.querySelectorAll('.sticker').length;
+      const sOwned = grid.querySelectorAll('.sticker.owned').length;
+      const sTotal = grid.querySelectorAll('.sticker').length;
       const cnt = document.getElementById(`cnt-${section}`);
-      if (cnt) {
-        cnt.textContent = `${sectionOwned}/${sectionTotal}`;
-        cnt.classList.toggle('complete', sectionOwned === sectionTotal);
+      if (cnt) { cnt.textContent = `${sOwned}/${sTotal}`; cnt.classList.toggle('complete', sOwned === sTotal); }
+
+      // update heatmap card
+      const pct = Math.round(sOwned / sTotal * 100);
+      const { fill, bg } = heatColor(pct);
+      const card = document.getElementById(`hm-${section}`)?.closest('.hm-card');
+      if (card) {
+        card.style.background = bg;
+        const bar = document.getElementById(`hm-${section}`);
+        if (bar) { bar.style.width = pct + '%'; bar.style.background = fill; }
+        const pctEl = card.querySelector('.hm-pct');
+        if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = fill; }
+        const countEl = document.getElementById(`hmc-${section}`);
+        if (countEl) countEl.textContent = `${sOwned}/${sTotal} figuritas`;
       }
 
+      // global
       const gOwned = document.querySelectorAll('.sticker.owned').length;
       document.getElementById('g-owned').textContent = gOwned;
       document.getElementById('g-missing').textContent = totalAll - gOwned;
       document.getElementById('g-bar').style.width = `${(gOwned / totalAll * 100).toFixed(1)}%`;
     }
 
-    document.querySelectorAll('.sticker').forEach(el => {
-      el.addEventListener('click', () => toggle(el));
-    });
+    document.querySelectorAll('.sticker').forEach(el => el.addEventListener('click', () => toggle(el)));
   </script>
 </body>
 </html>
