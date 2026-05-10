@@ -94,6 +94,8 @@ const teamStats = TEAMS.map(t => {
 
     /* heatmap view */
     #view-heatmap { display: none; }
+    .tab-active #view-heatmap, #view-heatmap.visible { display: block; }
+    .hidden { display: none !important; }
     .heatmap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
     @media (min-width: 500px) { .heatmap-grid { grid-template-columns: repeat(3, 1fr); } }
     @media (min-width: 700px) { .heatmap-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -228,8 +230,9 @@ const teamStats = TEAMS.map(t => {
     const totalAll = document.querySelectorAll('.sticker').length;
 
     function switchTab(tab) {
-      document.getElementById('view-stickers').style.display = tab === 'stickers' ? '' : 'none';
-      document.getElementById('view-heatmap').style.display  = tab === 'heatmap'  ? '' : 'none';
+      document.getElementById('view-stickers').classList.toggle('hidden', tab !== 'stickers');
+      document.getElementById('view-heatmap').classList.toggle('hidden', tab !== 'heatmap');
+      document.getElementById('view-heatmap').classList.toggle('visible', tab === 'heatmap');
       document.getElementById('tab-stickers').classList.toggle('active', tab === 'stickers');
       document.getElementById('tab-heatmap').classList.toggle('active',  tab === 'heatmap');
     }
