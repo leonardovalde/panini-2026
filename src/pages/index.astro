@@ -104,7 +104,9 @@ const allSections = [
     .scan-drop { border: 2px dashed #334155; border-radius: 12px; padding: 2rem 1rem; text-align: center; cursor: pointer; color: #64748b; font-size: 0.85rem; transition: border-color 0.15s; }
     .scan-drop:active { border-color: #38bdf8; }
     .scan-preview { width: 100%; border-radius: 10px; margin-top: 0.75rem; display: none; }
+    .scan-preview.visible { display: block; }
     .scan-btn { width: 100%; margin-top: 0.75rem; padding: 0.7rem; background: #38bdf8; color: #0f172a; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: none; }
+    .scan-btn.visible { display: block; }
     .scan-results { margin-top: 1rem; }
     .scan-group { margin-bottom: 0.75rem; }
     .scan-group h3 { font-size: 0.75rem; font-weight: 700; margin-bottom: 0.4rem; }
@@ -399,8 +401,8 @@ const allSections = [
       if (!scanFile) return;
       const url = URL.createObjectURL(scanFile);
       const preview = document.getElementById('scan-preview');
-      preview.src = url; preview.style.display = 'block';
-      document.getElementById('scan-btn').style.display = 'block';
+      preview.src = url; preview.classList.add('visible');
+      document.getElementById('scan-btn').classList.add('visible');
       document.getElementById('scan-results').innerHTML = '';
     });
     document.getElementById('scan-btn').addEventListener('click', async () => {
