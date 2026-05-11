@@ -97,6 +97,23 @@ const allSections = [
     .search-result .sr-dot.owned { background: #4ade80; }
     .search-result .sr-dot.missing { background: #334155; }
     .search-empty { font-size: 0.8rem; color: #475569; text-align: center; padding: 1rem; }
+
+    /* scan view */
+    #view-scan { display: none; padding: 1rem; }
+    #view-scan.visible { display: block; }
+    .scan-drop { border: 2px dashed #334155; border-radius: 12px; padding: 2rem 1rem; text-align: center; cursor: pointer; color: #64748b; font-size: 0.85rem; transition: border-color 0.15s; }
+    .scan-drop:active { border-color: #38bdf8; }
+    .scan-preview { width: 100%; border-radius: 10px; margin-top: 0.75rem; display: none; }
+    .scan-btn { width: 100%; margin-top: 0.75rem; padding: 0.7rem; background: #38bdf8; color: #0f172a; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: none; }
+    .scan-results { margin-top: 1rem; }
+    .scan-group { margin-bottom: 0.75rem; }
+    .scan-group h3 { font-size: 0.75rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .scan-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .chip { font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 20px; font-weight: 600; }
+    .chip.owned   { background: #166534; color: #bbf7d0; }
+    .chip.new     { background: #1e3a5f; color: #bae6fd; }
+    .chip.unknown { background: #1e293b; color: #64748b; }
+    .scan-loading { text-align: center; color: #64748b; font-size: 0.85rem; padding: 1rem; }
   </style>
 </head>
 <body>
@@ -118,6 +135,7 @@ const allSections = [
   <div class="tabs">
     <div class="tab active" id="tab-stickers" data-tab="stickers">🗂 Stickers</div>
     <div class="tab" id="tab-heatmap" data-tab="heatmap">🌡 Por país</div>
+    <div class="tab" id="tab-scan" data-tab="scan">📷 Escanear</div>
   </div>
 
   <nav id="team-nav">
@@ -234,6 +252,18 @@ const allSections = [
     </main>
   </div>
 
+  <!-- SCAN VIEW -->
+  <div id="view-scan">
+    <div class="scan-drop" id="scan-drop">
+      📷 Toca para tomar foto o elegir imagen<br/>
+      <small style="opacity:0.6">del reverso de las cartas</small>
+      <input type="file" id="scan-input" accept="image/*" capture="environment" style="display:none" />
+    </div>
+    <img id="scan-preview" class="scan-preview" alt="preview" />
+    <button class="scan-btn" id="scan-btn">🔍 Reconocer cartas</button>
+    <div class="scan-results" id="scan-results"></div>
+  </div>
+
   <!-- FAB búsqueda -->
   <button class="fab" id="fab-search">🔍</button>
   <div class="search-overlay" id="search-overlay">
@@ -257,8 +287,10 @@ const allSections = [
       document.getElementById('team-nav').classList.toggle('hidden', tab !== 'stickers');
       document.getElementById('view-heatmap').classList.toggle('hidden', tab !== 'heatmap');
       document.getElementById('view-heatmap').classList.toggle('visible', tab === 'heatmap');
+      document.getElementById('view-scan').classList.toggle('visible', tab === 'scan');
       document.getElementById('tab-stickers').classList.toggle('active', tab === 'stickers');
       document.getElementById('tab-heatmap').classList.toggle('active',  tab === 'heatmap');
+      document.getElementById('tab-scan').classList.toggle('active',     tab === 'scan');
     }
     document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => switchTab(el.dataset.tab)));
     document.querySelectorAll('[data-goto]').forEach(el => {
@@ -358,6 +390,35 @@ const allSections = [
     }
 
     document.querySelectorAll('.sticker').forEach(el => el.addEventListener('click', () => toggle(el)));
+
+    // SCAN
+    let scanFile = null;
+    document.getElementById('scan-drop').addEventListener('click', () => document.getElementById('scan-input').click());
+    document.getElementById('scan-input').addEventListener('change', e => {
+      scanFile = e.target.files[0];
+      if (!scanFile) return;
+      const url = URL.createObjectURL(scanFile);
+      const preview = document.getElementById('scan-preview');
+      preview.src = url; preview.style.display = 'block';
+      document.getElementById('scan-btn').style.display = 'block';
+      document.getElementById('scan-results').innerHTML = '';
+    });
+    document.getElementById('scan-btn').addEventListener('click', async () => {
+      if (!scanFile) return;
+      const results = document.getElementById('scan-results');
+      results.innerHTML = '<div class="scan-loading">⏳ Analizando imagen...</div>';
+      const form = new FormData();
+      form.append('image', scanFile);
+      const res = await fetch('/api/scan', { method: 'POST', body: form });
+      const data = await res.json();
+      if (data.error) { results.innerHTML = `<div class="scan-loading">❌ ${data.error}</div>`; return; }
+      if (!data.codes.length) { results.innerHTML = '<div class="scan-loading">No se detectaron códigos</div>'; return; }
+      results.innerHTML = `
+        ${data.owned.length ? `<div class="scan-group"><h3 style="color:#4ade80">✅ Ya las tienes (${data.owned.length})</h3><div class="scan-chips">${data.owned.map(c => `<span class="chip owned">${c}</span>`).join('')}</div></div>` : ''}
+        ${data.new.length ? `<div class="scan-group"><h3 style="color:#38bdf8">🆕 Nuevas (${data.new.length})</h3><div class="scan-chips">${data.new.map(c => `<span class="chip new">${c}</span>`).join('')}</div></div>` : ''}
+        ${data.unknown.length ? `<div class="scan-group"><h3 style="color:#64748b">❓ No reconocidas (${data.unknown.length})</h3><div class="scan-chips">${data.unknown.map(c => `<span class="chip unknown">${c}</span>`).join('')}</div></div>` : ''}
+      `;
+    });
   </script>
   </div><!-- .app -->
 </body>
