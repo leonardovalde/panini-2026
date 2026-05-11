@@ -414,7 +414,7 @@ const allSections = [
       const res = await fetch('/api/scan', { method: 'POST', body: form });
       const data = await res.json();
       if (data.error) { results.innerHTML = `<div class="scan-loading">❌ ${data.error}</div>`; return; }
-      if (!data.codes.length) { results.innerHTML = '<div class="scan-loading">No se detectaron códigos</div>'; return; }
+      if (!data.codes.length) { results.innerHTML = `<div class="scan-loading">No se detectaron códigos<br/><small style="opacity:0.5;word-break:break-all">${data.rawText || JSON.stringify(data.debug) || '(sin texto)'}</small></div>`; return; }
       results.innerHTML = `
         ${data.owned.length ? `<div class="scan-group"><h3 style="color:#4ade80">✅ Ya las tienes (${data.owned.length})</h3><div class="scan-chips">${data.owned.map(c => `<span class="chip owned">${c}</span>`).join('')}</div></div>` : ''}
         ${data.new.length ? `<div class="scan-group"><h3 style="color:#38bdf8">🆕 Nuevas (${data.new.length})</h3><div class="scan-chips">${data.new.map(c => `<span class="chip new">${c}</span>`).join('')}</div></div>` : ''}

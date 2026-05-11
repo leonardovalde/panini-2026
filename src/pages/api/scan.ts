@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../lib/db';
+import sharp from 'sharp';
 
 export const POST: APIRoute = async ({ request }) => {
   const apiKey = import.meta.env.GCP_VISION_KEY;
@@ -12,7 +13,12 @@ export const POST: APIRoute = async ({ request }) => {
   if (!file) return new Response(JSON.stringify({ error: 'No image' }), { status: 400 });
 
   const buffer = await file.arrayBuffer();
-  const base64 = Buffer.from(buffer).toString('base64');
+  // Resize + convert to JPEG to reduce size and handle HEIC/PNG/WebP
+  const jpegBuffer = await sharp(Buffer.from(buffer))
+    .resize({ width: 1600, withoutEnlargement: true })
+    .jpeg({ quality: 80 })
+    .toBuffer();
+  const base64 = jpegBuffer.toString('base64');
 
   // Call Google Cloud Vision OCR
   const visionRes = await fetch(
@@ -30,15 +36,29 @@ export const POST: APIRoute = async ({ request }) => {
   );
 
   const visionData = await visionRes.json();
+  console.log('Vision full response:', JSON.stringify(visionData));
   const rawText: string = visionData.responses?.[0]?.fullTextAnnotation?.text ?? '';
+  console.log('Vision raw text:', JSON.stringify(rawText));
+  console.log('Vision error:', JSON.stringify(visionData.responses?.[0]?.error ?? 'none'));
 
-  // Extract sticker codes: 2-3 uppercase letters + 1-2 digits (e.g. ARG17, MEX3, FWC1, CC12)
+  // Return raw vision data for debugging
+  if (!rawText) {
+    return new Response(JSON.stringify({ 
+      codes: [], owned: [], missing: [], rawText: '',
+      debug: visionData.responses?.[0]
+    }), { headers: { 'Content-Type': 'application/json' } });
+  }
+
+  // Extract sticker codes: 2-3 uppercase letters + optional space + 1-2 digits
+  // Handles both "ARG17" and "KSA 2" and "TUN 16"
   const codes = [...new Set(
-    [...rawText.matchAll(/\b([A-Z]{2,3}\d{1,2})\b/g)].map(m => m[1])
+    [...rawText.matchAll(/\b([A-Z]{2,3})\s?(\d{1,2})\b/g)]
+      .map(m => `${m[1]}${m[2]}`)
+      .filter(c => c.length >= 3)
   )];
 
   if (!codes.length) {
-    return new Response(JSON.stringify({ codes: [], owned: [], missing: [] }), {
+    return new Response(JSON.stringify({ codes: [], owned: [], missing: [], rawText }), {
       headers: { 'Content-Type': 'application/json' },
     });
   }
