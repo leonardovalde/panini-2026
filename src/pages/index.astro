@@ -103,8 +103,9 @@ const allSections = [
     #view-scan.visible { display: block; }
     .scan-drop { border: 2px dashed #334155; border-radius: 12px; padding: 2rem 1rem; text-align: center; cursor: pointer; color: #64748b; font-size: 0.85rem; transition: border-color 0.15s; }
     .scan-drop:active { border-color: #38bdf8; }
-    .scan-preview { width: 100%; border-radius: 10px; margin-top: 0.75rem; display: none; }
+    .scan-preview { width: 100%; border-radius: 10px; margin-top: 0.75rem; display: none; min-height: 40px; }
     .scan-preview.visible { display: block; }
+    .scan-preview:not([src]), .scan-preview[src=""] { display: flex; align-items: center; justify-content: center; background: #1e293b; color: #64748b; font-size: 0.8rem; padding: 1rem; border-radius: 10px; }
     .scan-btn { width: 100%; margin-top: 0.75rem; padding: 0.7rem; background: #38bdf8; color: #0f172a; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: none; }
     .scan-btn.visible { display: block; }
     .scan-results { margin-top: 1rem; }
@@ -402,9 +403,21 @@ const allSections = [
       if (!original) return;
       scanFile = original;
 
-      // Show preview with original file (works for JPEG/PNG, may not for HEIC)
       const preview = document.getElementById('scan-preview');
-      preview.src = URL.createObjectURL(original);
+      // Try canvas conversion for preview (handles HEIC on Safari, not Chrome)
+      const bitmap = await createImageBitmap(original).catch(() => null);
+      if (bitmap) {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, 800 / Math.max(bitmap.width, bitmap.height));
+        canvas.width = Math.round(bitmap.width * scale);
+        canvas.height = Math.round(bitmap.height * scale);
+        canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        preview.src = canvas.toDataURL('image/jpeg', 0.8);
+      } else {
+        // HEIC not renderable in browser — show filename instead
+        preview.src = '';
+        preview.alt = `📷 ${original.name} (${(original.size/1024/1024).toFixed(1)}MB)`;
+      }
       preview.classList.add('visible');
       document.getElementById('scan-btn').classList.add('visible');
       document.getElementById('scan-results').innerHTML = '';
