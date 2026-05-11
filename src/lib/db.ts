@@ -1,5 +1,5 @@
 import pg from 'pg';
-import { INTRO, FIFA_MUSEUM, TEAMS } from './stickers.js';
+import { INTRO, FIFA_MUSEUM, TEAMS, COCA_COLA } from './stickers.js';
 
 const { Pool } = pg;
 let pool: pg.Pool;
@@ -24,6 +24,7 @@ export async function initDB() {
         ...INTRO,
         ...TEAMS.flatMap(t => t.stickers),
         ...FIFA_MUSEUM,
+        ...COCA_COLA,
       ];
       const values = all.map((s, i) => `($${i + 1}, false)`).join(',');
       const ids = all.map(s => s.id);

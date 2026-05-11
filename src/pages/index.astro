@@ -1,6 +1,6 @@
 ---
 import { getPool, initDB } from '../lib/db';
-import { INTRO, FIFA_MUSEUM, TEAMS } from '../lib/stickers';
+import { INTRO, FIFA_MUSEUM, TEAMS, COCA_COLA } from '../lib/stickers';
 
 await initDB();
 const { rows } = await getPool().query('SELECT id, owned FROM stickers');
@@ -14,11 +14,12 @@ const allSections = [
   { code: 'intro', name: 'Introducción', flag: '🌍', stickers: INTRO },
   ...TEAMS.map(t => ({ code: t.code, name: t.name, flag: t.flag, stickers: t.stickers })),
   { code: 'museum', name: 'FIFA Museum', flag: '🏆', stickers: FIFA_MUSEUM },
+  { code: 'cocacola', name: 'Coca-Cola', flag: '🥤', stickers: COCA_COLA },
 ].map(s => {
   const owned = s.stickers.filter(x => ownedSet.has(x.id)).length;
   const pct = Math.round(owned / s.stickers.length * 100);
   return { ...s, owned, total: s.stickers.length, pct };
-});
+}).sort((a, b) => a.pct - b.pct);
 ---
 
 <html lang="es">
@@ -123,6 +124,7 @@ const allSections = [
     <a href="#intro">Intro</a>
     {TEAMS.map(t => <a href={`#${t.code}`}>{t.flag} {t.name}</a>)}
     <a href="#museum">Museum</a>
+    <a href="#cocacola">🥤 Coca-Cola</a>
   </nav>
 
   <!-- STICKERS VIEW -->
@@ -180,6 +182,23 @@ const allSections = [
         <div class="sticker-grid">
           {FIFA_MUSEUM.map(s => (
             <div class={`sticker foil ${ownedSet.has(s.id) ? 'owned' : 'missing'}`} data-id={s.id} data-section="museum" title={`${s.id} - ${s.name}`}>
+              <span class="sid">{s.id}</span>
+              <span class="sname">{s.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="section collapsed" id="cocacola">
+        <div class="section-header" data-toggle="cocacola">
+          <span class="section-flag">🥤</span>
+          <h2>Coca-Cola</h2>
+          <span class="section-count" id="cnt-cocacola">{COCA_COLA.filter(s => ownedSet.has(s.id)).length}/{COCA_COLA.length}</span>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="sticker-grid">
+          {COCA_COLA.map(s => (
+            <div class={`sticker ${ownedSet.has(s.id) ? 'owned' : 'missing'}`} data-id={s.id} data-section="cocacola" title={`${s.id} - ${s.name}`}>
               <span class="sid">{s.id}</span>
               <span class="sname">{s.name}</span>
             </div>

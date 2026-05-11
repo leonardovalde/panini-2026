@@ -46,8 +46,6 @@ export const FIFA_MUSEUM: Sticker[] = [
   { id: 'FWC18', name: 'Germany 2014', foil: true },
   { id: 'FWC19', name: 'Argentina 2022', foil: true },
 ];
-
-export const TEAMS: Team[] = [
   team('MEX', 'México', '🇲🇽', ['Luis Malagón','Johan Vasquez','Jorge Sánchez','Cesar Montes','Jesus Gallardo','Israel Reyes','Diego Lainez','Carlos Rodriguez','Edson Alvarez','Orbelin Pineda','Marcel Ruiz','Érick Sánchez','Hirving Lozano','Santiago Giménez','Raúl Jiménez','Alexis Vega','Roberto Alvarado','Cesar Huerta']),
   team('RSA', 'South Africa', '🇿🇦', ['Ronwen Williams','Sipho Chaine','Aubrey Modiba','Samukele Kabini','Mbekezeli Mbokazi','Khulumani Ndamane','Siyabonga Ngezana','Khuliso Mudau','Nkosinathi Sibisi','Teboho Mokoena','Thalente Mbatha','Bathasi Aubaas','Yaya Sithole','Sipho Mbule','Lyle Foster','Iqraam Rayners','Mohau Nkota','Oswin Appollis']),
   team('KOR', 'South Korea', '🇰🇷', ['Hyeon-woo Jo','Seung-Gyu Kim','Min-jae Kim','Yu-min Cho','Young-woo Seol','Han-beom Lee','Tae-seok Lee','Myung-jae Lee','Jae-sung Lee','In-beom Hwang','Kang-in Lee','Seung-ho Paik','Jens Castrop','Dongg-yeong Lee','Gue-sung Cho','Heung-min Son','Hee-chan Hwang','Hyeon-Gyu Oh']),
@@ -96,4 +94,19 @@ export const TEAMS: Team[] = [
   team('CRO', 'Croacia', '🇭🇷', ['Dominik Livaković','Duje Caleta-Car','Josko Gvardiol','Josip Stanišić','Luka Vušković','Josip Sutalo','Kristijan Jakic','Luka Modrić','Mateo Kovacic','Martin Baturina','Lovro Majer','Mario Pasalic','Petar Sucic','Ivan Perišić','Marco Pasalic','Ante Budimir','Andrej Kramarić','Franjo Ivanovic']),
   team('GHA', 'Ghana', '🇬🇭', ['Lawrence Ati Zigi','Tariq Lamptey','Mohammed Salisu','Alidu Seidu','Alexander Djiku','Gideon Mensah','Caleb Yirenkyi','Abdul Issahaku Fatawu','Thomas Partey','Salis Abdul Samed','Kamaldeen Sulemana','Mohammed Kudus','Inaki Williams','Jordan Ayew','Andrew Ayew','Joseph Paintsil','Osman Bukari','Antoine Semenyo']),
   team('PAN', 'Panamá', '🇵🇦', ['Orlando Mosquera','Luis Mejia','Fidel Escobar','Andres Andrade','Michael Amir Murillo','Eric Davis','Jose Cordoba','Cesar Blackman','Cristian Martinez','Aníbal Godoy','Adalberto Carrasquilla','Édgar Bárcenas','Carlos Harvey','Ismael Díaz','Jose Fajardo','Cecilio Waterman','Jose Luiz Rodriguez','Alberto Quintero']),
+];
+
+export const COCA_COLA: Sticker[] = [
+  { id: 'CC1', name: 'Lamine Yamal - España' },
+  { id: 'CC2', name: 'Joshua Kimmich - Alemania' },
+  { id: 'CC3', name: 'Harry Kane - Inglaterra' },
+  { id: 'CC4', name: 'Santiago Giménez - México' },
+  { id: 'CC5', name: 'Antonee Robinson - USA' },
+  { id: 'CC6', name: 'Jefferson Lerma - Colombia' },
+  { id: 'CC7', name: 'Edson Álvarez - México' },
+  { id: 'CC8', name: 'Virgil van Dijk - Países Bajos' },
+  { id: 'CC9', name: 'Alphonso Davies - Canadá' },
+  { id: 'CC10', name: 'Weston McKennie - USA' },
+  { id: 'CC11', name: 'Lautaro Martínez - Argentina' },
+  { id: 'CC12', name: 'Gabriel Magalhães - Brasil' },
 ];
