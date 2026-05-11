@@ -396,9 +396,21 @@ const allSections = [
     // SCAN
     let scanFile = null;
     document.getElementById('scan-drop').addEventListener('click', () => document.getElementById('scan-input').click());
-    document.getElementById('scan-input').addEventListener('change', e => {
+    document.getElementById('scan-input').addEventListener('change', async e => {
       scanFile = e.target.files[0];
       if (!scanFile) return;
+
+      // Convert to JPEG via canvas (handles HEIC on iOS/macOS)
+      const bitmap = await createImageBitmap(scanFile).catch(() => null);
+      if (bitmap) {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+        canvas.width = Math.round(bitmap.width * scale);
+        canvas.height = Math.round(bitmap.height * scale);
+        canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        await new Promise(res => canvas.toBlob(blob => { scanFile = blob; res(); }, 'image/jpeg', 0.85));
+      }
+
       const url = URL.createObjectURL(scanFile);
       const preview = document.getElementById('scan-preview');
       preview.src = url; preview.classList.add('visible');

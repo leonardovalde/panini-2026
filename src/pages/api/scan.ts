@@ -13,11 +13,17 @@ export const POST: APIRoute = async ({ request }) => {
   if (!file) return new Response(JSON.stringify({ error: 'No image' }), { status: 400 });
 
   const buffer = await file.arrayBuffer();
-  // Resize + convert to JPEG to reduce size and handle HEIC/PNG/WebP
-  const jpegBuffer = await sharp(Buffer.from(buffer))
-    .resize({ width: 1600, withoutEnlargement: true })
-    .jpeg({ quality: 80 })
-    .toBuffer();
+  // Resize + convert to JPEG
+  let jpegBuffer: Buffer;
+  try {
+    jpegBuffer = await sharp(Buffer.from(buffer))
+      .resize({ width: 1600, withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+  } catch {
+    // fallback: send as-is if sharp can't process (e.g. HEIC without plugin)
+    jpegBuffer = Buffer.from(buffer);
+  }
   const base64 = jpegBuffer.toString('base64');
 
   // Call Google Cloud Vision OCR
