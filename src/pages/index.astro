@@ -261,11 +261,12 @@ const allSections = [
 
   <!-- SCAN VIEW -->
   <div id="view-scan">
-    <div class="scan-drop" id="scan-drop">
-      📷 Toca para tomar foto o elegir imagen<br/>
-      <small style="opacity:0.6">del reverso de las cartas</small>
-      <input type="file" id="scan-input" accept="image/*" capture="environment" style="display:none" />
+    <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+      <button style="flex:1;padding:0.65rem;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-camera">📷 Cámara</button>
+      <button style="flex:1;padding:0.65rem;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-file">🖼 Archivo</button>
     </div>
+    <input type="file" id="scan-input-camera" accept="image/*" capture="environment" style="display:none" />
+    <input type="file" id="scan-input-file" accept="image/*" style="display:none" />
     <img id="scan-preview" class="scan-preview" alt="preview" />
     <button class="scan-btn" id="scan-btn">🔍 Reconocer cartas</button>
     <div class="scan-results" id="scan-results"></div>
@@ -400,15 +401,14 @@ const allSections = [
 
     // SCAN
     let scanFile = null;
-    document.getElementById('scan-drop').addEventListener('click', () => document.getElementById('scan-input').click());
-    document.getElementById('scan-input').addEventListener('change', async e => {
-      const original = e.target.files[0];
-      if (!original) return;
-      scanFile = original;
+    document.getElementById('btn-camera').addEventListener('click', () => document.getElementById('scan-input-camera').click());
+    document.getElementById('btn-file').addEventListener('click', () => document.getElementById('scan-input-file').click());
 
+    async function handleScanFile(file) {
+      if (!file) return;
+      scanFile = file;
       const preview = document.getElementById('scan-preview');
-      // Try canvas conversion for preview (handles HEIC on Safari, not Chrome)
-      const bitmap = await createImageBitmap(original).catch(() => null);
+      const bitmap = await createImageBitmap(file).catch(() => null);
       if (bitmap) {
         const canvas = document.createElement('canvas');
         const scale = Math.min(1, 800 / Math.max(bitmap.width, bitmap.height));
@@ -417,14 +417,15 @@ const allSections = [
         canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
         preview.src = canvas.toDataURL('image/jpeg', 0.8);
       } else {
-        // HEIC not renderable in browser — show filename instead
-        preview.src = '';
-        preview.alt = `📷 ${original.name} (${(original.size/1024/1024).toFixed(1)}MB)`;
+        preview.src = ''; preview.alt = `📷 ${file.name}`;
       }
       preview.classList.add('visible');
       document.getElementById('scan-btn').classList.add('visible');
       document.getElementById('scan-results').innerHTML = '';
-    });
+    }
+
+    document.getElementById('scan-input-camera').addEventListener('change', e => handleScanFile(e.target.files[0]));
+    document.getElementById('scan-input-file').addEventListener('change', e => handleScanFile(e.target.files[0]));
 
     document.getElementById('scan-btn').addEventListener('click', async () => {
       if (!scanFile) return;
