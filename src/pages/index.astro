@@ -110,9 +110,12 @@ const allSections = [
     .scan-results { margin-top: 1rem; }
     .scan-group { margin-bottom: 0.75rem; }
     .scan-group h3 { font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .scan-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid #1e293b; }
-    .chip-code { font-size: 0.7rem; font-weight: 800; color: #38bdf8; min-width: 52px; }
-    .chip-name { font-size: 0.8rem; color: #e2e8f0; }
+    .scan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .scan-card { border-radius: 8px; padding: 0.5rem 0.6rem; }
+    .scan-card.owned   { background: #166534; border: 1px solid #4ade80; }
+    .scan-card.missing { background: #3b0f0f; border: 1px solid #f87171; }
+    .scan-card .sc-code { font-size: 0.65rem; font-weight: 800; opacity: 0.7; }
+    .scan-card .sc-name { font-size: 0.78rem; font-weight: 600; color: #f1f5f9; line-height: 1.2; margin-top: 2px; }
     .scan-loading { text-align: center; color: #64748b; font-size: 0.85rem; padding: 1rem; }
   </style>
 </head>
@@ -395,10 +398,25 @@ const allSections = [
     let scanFile = null;
     document.getElementById('scan-drop').addEventListener('click', () => document.getElementById('scan-input').click());
     document.getElementById('scan-input').addEventListener('change', async e => {
-      scanFile = e.target.files[0];
-      if (!scanFile) return;
+      const original = e.target.files[0];
+      if (!original) return;
+      scanFile = original;
 
-      // Convert to JPEG via canvas (handles HEIC on iOS/macOS)
+      // Show preview with original file (works for JPEG/PNG, may not for HEIC)
+      const preview = document.getElementById('scan-preview');
+      preview.src = URL.createObjectURL(original);
+      preview.classList.add('visible');
+      document.getElementById('scan-btn').classList.add('visible');
+      document.getElementById('scan-results').innerHTML = '';
+    });
+
+    document.getElementById('scan-btn').addEventListener('click', async () => {
+      if (!scanFile) return;
+      const results = document.getElementById('scan-results');
+      results.innerHTML = '<div class="scan-loading">⏳ Analizando imagen...</div>';
+
+      // Convert to JPEG via canvas before sending
+      let fileToSend = scanFile;
       const bitmap = await createImageBitmap(scanFile).catch(() => null);
       if (bitmap) {
         const canvas = document.createElement('canvas');
@@ -406,36 +424,36 @@ const allSections = [
         canvas.width = Math.round(bitmap.width * scale);
         canvas.height = Math.round(bitmap.height * scale);
         canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-        await new Promise(res => canvas.toBlob(blob => { scanFile = blob; res(); }, 'image/jpeg', 0.85));
+        fileToSend = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
       }
 
-      const url = URL.createObjectURL(scanFile);
-      const preview = document.getElementById('scan-preview');
-      preview.src = url; preview.classList.add('visible');
-      document.getElementById('scan-btn').classList.add('visible');
-      document.getElementById('scan-results').innerHTML = '';
-    });
-    document.getElementById('scan-btn').addEventListener('click', async () => {
-      if (!scanFile) return;
-      const results = document.getElementById('scan-results');
-      results.innerHTML = '<div class="scan-loading">⏳ Analizando imagen...</div>';
       const form = new FormData();
-      form.append('image', scanFile);
+      form.append('image', fileToSend);
       const res = await fetch('/api/scan', { method: 'POST', body: form });
       const data = await res.json();
       if (data.error) { results.innerHTML = `<div class="scan-loading">❌ ${data.error}</div>`; return; }
       if (!data.codes.length) { results.innerHTML = `<div class="scan-loading">No se detectaron códigos<br/><small style="opacity:0.5;word-break:break-all">${data.rawText || JSON.stringify(data.debug) || '(sin texto)'}</small></div>`; return; }
 
-      function stickerLabel(code) {
+      function stickerLabel(code, isOwned) {
         const el = document.querySelector(`.sticker[data-id="${code}"]`);
-        const name = el?.querySelector('.sname')?.textContent?.trim() || '';
-        return `<div class="scan-item"><span class="chip-code">${code}</span>${name ? `<span class="chip-name">${name}</span>` : ''}</div>`;
+        const name = el?.querySelector('.sname')?.textContent?.trim() || code;
+        return `<div class="scan-card ${isOwned ? 'owned' : 'missing'}">
+          <div class="sc-code">${code}</div>
+          <div class="sc-name">${name}</div>
+        </div>`;
       }
 
+      const total = data.owned.length + data.new.length;
       results.innerHTML = `
-        ${data.owned.length ? `<div class="scan-group"><h3 style="color:#4ade80">✅ Ya las tienes (${data.owned.length})</h3>${data.owned.map(stickerLabel).join('')}</div>` : ''}
-        ${data.new.length ? `<div class="scan-group"><h3 style="color:#38bdf8">🆕 Nuevas para pegar (${data.new.length})</h3>${data.new.map(stickerLabel).join('')}</div>` : ''}
-        ${data.unknown.length ? `<div class="scan-group"><h3 style="color:#64748b">❓ No reconocidas</h3>${data.unknown.map(c => `<div class="scan-item"><span class="chip-code">${c}</span></div>`).join('')}</div>` : ''}
+        <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">
+          ${total} carta${total !== 1 ? 's' : ''} detectada${total !== 1 ? 's' : ''}
+          · <span style="color:#4ade80">${data.owned.length} ya tenés</span>
+          · <span style="color:#f87171">${data.new.length} nueva${data.new.length !== 1 ? 's' : ''}</span>
+        </p>
+        <div class="scan-grid">
+          ${[...data.owned.map(c => stickerLabel(c, true)), ...data.new.map(c => stickerLabel(c, false))].join('')}
+        </div>
+        ${data.unknown.length ? `<p style="font-size:0.7rem;color:#475569;margin-top:0.5rem">No reconocidas: ${data.unknown.join(', ')}</p>` : ''}
       `;
     });
   </script>
