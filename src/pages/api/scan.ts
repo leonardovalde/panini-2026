@@ -1,6 +1,9 @@
 import type { APIRoute } from 'astro';
 import { getPool } from '../../lib/db';
-import sharp from 'sharp';
+import { execSync } from 'child_process';
+import { writeFileSync, readFileSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
 export const POST: APIRoute = async ({ request }) => {
   const apiKey = import.meta.env.GCP_VISION_KEY;
@@ -13,18 +16,18 @@ export const POST: APIRoute = async ({ request }) => {
   if (!file) return new Response(JSON.stringify({ error: 'No image' }), { status: 400 });
 
   const buffer = await file.arrayBuffer();
-  // Resize + convert to JPEG
-  let jpegBuffer: Buffer;
+  const inputPath = join(tmpdir(), `scan_in_${Date.now()}`);
+  const outputPath = join(tmpdir(), `scan_out_${Date.now()}.jpg`);
+  writeFileSync(inputPath, Buffer.from(buffer));
+
+  let base64: string;
   try {
-    jpegBuffer = await sharp(Buffer.from(buffer))
-      .resize({ width: 1600, withoutEnlargement: true })
-      .jpeg({ quality: 80 })
-      .toBuffer();
-  } catch {
-    // fallback: send as-is if sharp can't process (e.g. HEIC without plugin)
-    jpegBuffer = Buffer.from(buffer);
+    // Use sips (macOS) or fallback to direct base64
+    execSync(`sips -s format jpeg "${inputPath}" --out "${outputPath}" 2>/dev/null || cp "${inputPath}" "${outputPath}"`);
+    base64 = readFileSync(outputPath).toString('base64');
+  } finally {
+    try { unlinkSync(inputPath); unlinkSync(outputPath); } catch {}
   }
-  const base64 = jpegBuffer.toString('base64');
 
   // Call Google Cloud Vision OCR
   const visionRes = await fetch(
