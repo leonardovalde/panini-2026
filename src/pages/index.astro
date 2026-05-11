@@ -96,7 +96,51 @@ const allSections = [
     .sticker.photo.owned   { background: #bee3f8; border-color: #63b3ed; color: #2a4365; }
     .sticker.photo.missing { background: #ebf8ff; border-color: #bee3f8; color: #90cdf4; }
 
-    /* heatmap view */
+    /* collapsible sections */
+    .section-header { cursor: pointer; }
+    .section-header .chevron { margin-left: 0.3rem; font-size: 0.7rem; color: #a0aec0; transition: transform 0.2s; }
+    .section.collapsed .sticker-grid { display: none; }
+    .section.collapsed .chevron { transform: rotate(-90deg); }
+
+    /* search fab */
+    .fab {
+      position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 200;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: #4299e1; color: #fff; border: none;
+      font-size: 1.3rem; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(66,153,225,0.5);
+      display: flex; align-items: center; justify-content: center;
+      touch-action: manipulation;
+    }
+    .search-overlay {
+      display: none; position: fixed; inset: 0; z-index: 199;
+      background: rgba(0,0,0,0.4); align-items: flex-start; justify-content: center;
+      padding-top: 5rem;
+    }
+    .search-overlay.open { display: flex; }
+    .search-box {
+      background: #fff; border-radius: 14px; padding: 1rem;
+      width: 90%; max-width: 380px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .search-box input {
+      width: 100%; border: 1.5px solid #e2e8f0; border-radius: 8px;
+      padding: 0.6rem 0.75rem; font-size: 1rem; outline: none;
+      color: #2d3748;
+    }
+    .search-box input:focus { border-color: #4299e1; }
+    .search-results { margin-top: 0.6rem; max-height: 50vh; overflow-y: auto; }
+    .search-result {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 0.4rem; border-radius: 8px; cursor: pointer;
+      font-size: 0.85rem; color: #2d3748;
+    }
+    .search-result:active { background: #ebf8ff; }
+    .search-result .sr-id { font-weight: 700; color: #4299e1; min-width: 52px; font-size: 0.75rem; }
+    .search-result .sr-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .search-result .sr-dot.owned { background: #68d391; }
+    .search-result .sr-dot.missing { background: #cbd5e0; }
+    .search-empty { font-size: 0.8rem; color: #a0aec0; text-align: center; padding: 1rem; }
     #view-heatmap { display: none; }
     .tab-active #view-heatmap, #view-heatmap.visible { display: block; }
     .hidden { display: none !important; }
@@ -147,10 +191,11 @@ const allSections = [
     </nav>
     <main>
       <div class="section" id="intro">
-        <div class="section-header">
+        <div class="section-header" data-toggle="intro">
           <span class="section-flag">🌍</span>
           <h2>Introducción</h2>
           <span class="section-count" id="cnt-intro">{INTRO.filter(s => ownedSet.has(s.id)).length}/{INTRO.length}</span>
+          <span class="chevron">▾</span>
         </div>
         <div class="sticker-grid">
           {INTRO.map(s => (
@@ -166,10 +211,11 @@ const allSections = [
         const teamOwned = t.stickers.filter(s => ownedSet.has(s.id)).length;
         return (
           <div class="section" id={t.code}>
-            <div class="section-header">
+            <div class="section-header" data-toggle={t.code}>
               <span class="section-flag">{t.flag}</span>
               <h2>{t.name}</h2>
               <span class={`section-count ${teamOwned === t.stickers.length ? 'complete' : ''}`} id={`cnt-${t.code}`}>{teamOwned}/{t.stickers.length}</span>
+              <span class="chevron">▾</span>
             </div>
             <div class="sticker-grid">
               {t.stickers.map(s => (
@@ -187,10 +233,11 @@ const allSections = [
       })}
 
       <div class="section" id="museum">
-        <div class="section-header">
+        <div class="section-header" data-toggle="museum">
           <span class="section-flag">🏆</span>
           <h2>FIFA Museum</h2>
           <span class="section-count" id="cnt-museum">{FIFA_MUSEUM.filter(s => ownedSet.has(s.id)).length}/{FIFA_MUSEUM.length}</span>
+          <span class="chevron">▾</span>
         </div>
         <div class="sticker-grid">
           {FIFA_MUSEUM.map(s => (
@@ -230,9 +277,24 @@ const allSections = [
     </main>
   </div>
 
+  <!-- FAB búsqueda -->
+  <button class="fab" id="fab-search">🔍</button>
+  <div class="search-overlay" id="search-overlay">
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="Buscar jugador o ID..." autocomplete="off" />
+      <div class="search-results" id="search-results"></div>
+    </div>
+  </div>
+
   <script>
     const totalAll = document.querySelectorAll('.sticker').length;
 
+    // COLLAPSIBLE
+    document.querySelectorAll('[data-toggle]').forEach(header => {
+      header.addEventListener('click', () => header.closest('.section').classList.toggle('collapsed'));
+    });
+
+    // TABS
     function switchTab(tab) {
       document.getElementById('view-stickers').classList.toggle('hidden', tab !== 'stickers');
       document.getElementById('view-heatmap').classList.toggle('hidden', tab !== 'heatmap');
@@ -240,65 +302,102 @@ const allSections = [
       document.getElementById('tab-stickers').classList.toggle('active', tab === 'stickers');
       document.getElementById('tab-heatmap').classList.toggle('active',  tab === 'heatmap');
     }
-
-    function heatColor(pct) {
-      const r = pct < 50 ? 255 : Math.round(255 - (pct - 50) * 5.1);
-      const g = pct < 50 ? Math.round(pct * 5.1) : 255;
-      return { fill: `rgb(${r},${g},80)`, bg: `rgba(${r},${g},80,0.15)` };
-    }
-
-    async function toggle(el) {
-      const id = el.dataset.id;
-      const section = el.dataset.section;
-      const newOwned = !el.classList.contains('owned');
-
-      await fetch('/api/sticker', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, owned: newOwned }),
-      });
-
-      el.classList.toggle('owned', newOwned);
-      el.classList.toggle('missing', !newOwned);
-
-      // section counter
-      const grid = el.closest('.sticker-grid');
-      const sOwned = grid.querySelectorAll('.sticker.owned').length;
-      const sTotal = grid.querySelectorAll('.sticker').length;
-      const cnt = document.getElementById(`cnt-${section}`);
-      if (cnt) { cnt.textContent = `${sOwned}/${sTotal}`; cnt.classList.toggle('complete', sOwned === sTotal); }
-
-      // update heatmap card
-      const pct = Math.round(sOwned / sTotal * 100);
-      const { fill, bg } = heatColor(pct);
-      const card = document.getElementById(`hm-${section}`)?.closest('.hm-card');
-      if (card) {
-        card.style.background = bg;
-        const bar = document.getElementById(`hm-${section}`);
-        if (bar) { bar.style.width = pct + '%'; bar.style.background = fill; }
-        const pctEl = card.querySelector('.hm-pct');
-        if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = fill; }
-        const countEl = document.getElementById(`hmc-${section}`);
-        if (countEl) countEl.textContent = `${sOwned}/${sTotal} figuritas`;
-      }
-
-      // global
-      const gOwned = document.querySelectorAll('.sticker.owned').length;
-      document.getElementById('g-owned').textContent = gOwned;
-      document.getElementById('g-missing').textContent = totalAll - gOwned;
-      document.getElementById('g-bar').style.width = `${(gOwned / totalAll * 100).toFixed(1)}%`;
-    }
-
-    document.querySelectorAll('[data-tab]').forEach(el => {
-      el.addEventListener('click', () => switchTab(el.dataset.tab));
-    });
-
+    document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => switchTab(el.dataset.tab)));
     document.querySelectorAll('[data-goto]').forEach(el => {
       el.addEventListener('click', () => {
         switchTab('stickers');
         setTimeout(() => document.getElementById(el.dataset.goto)?.scrollIntoView({ behavior: 'smooth' }), 50);
       });
     });
+
+    // SEARCH
+    const allStickers = Array.from(document.querySelectorAll('.sticker')).map(el => ({
+      el, id: el.dataset.id, section: el.dataset.section,
+      name: el.querySelector('.sname')?.textContent ?? '',
+    }));
+
+    document.getElementById('fab-search').addEventListener('click', () => {
+      document.getElementById('search-overlay').classList.add('open');
+      setTimeout(() => document.getElementById('search-input').focus(), 50);
+    });
+    document.getElementById('search-overlay').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeSearch();
+    });
+    function closeSearch() {
+      document.getElementById('search-overlay').classList.remove('open');
+      document.getElementById('search-input').value = '';
+      document.getElementById('search-results').innerHTML = '';
+    }
+    document.getElementById('search-input').addEventListener('input', e => {
+      const q = e.target.value.trim().toLowerCase();
+      const results = document.getElementById('search-results');
+      if (!q) { results.innerHTML = ''; return; }
+      const matches = allStickers.filter(s => s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)).slice(0, 20);
+      if (!matches.length) { results.innerHTML = '<div class="search-empty">Sin resultados</div>'; return; }
+      results.innerHTML = matches.map((s, i) =>
+        `<div class="search-result" data-idx="${i}">
+          <span class="sr-dot ${s.el.classList.contains('owned') ? 'owned' : 'missing'}"></span>
+          <span class="sr-id">${s.id}</span>
+          <span>${s.name}</span>
+        </div>`
+      ).join('');
+      results.querySelectorAll('.search-result').forEach((row, i) => {
+        row.addEventListener('click', () => {
+          closeSearch();
+          switchTab('stickers');
+          const sec = document.getElementById(matches[i].section);
+          if (sec?.classList.contains('collapsed')) sec.classList.remove('collapsed');
+          setTimeout(() => {
+            matches[i].el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            matches[i].el.style.outline = '3px solid #4299e1';
+            setTimeout(() => matches[i].el.style.outline = '', 1500);
+          }, 80);
+        });
+      });
+    });
+
+    // HEATMAP
+    function heatColor(pct) {
+      const r = pct < 50 ? 255 : Math.round(255 - (pct - 50) * 5.1);
+      const g = pct < 50 ? Math.round(pct * 5.1) : 255;
+      return { fill: `rgb(${r},${g},80)`, bg: `rgba(${r},${g},80,0.15)` };
+    }
+
+    // TOGGLE STICKER
+    async function toggle(el) {
+      const id = el.dataset.id;
+      const section = el.dataset.section;
+      const newOwned = !el.classList.contains('owned');
+      await fetch('/api/sticker', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, owned: newOwned }),
+      });
+      el.classList.toggle('owned', newOwned);
+      el.classList.toggle('missing', !newOwned);
+
+      const grid = el.closest('.sticker-grid');
+      const sOwned = grid.querySelectorAll('.sticker.owned').length;
+      const sTotal = grid.querySelectorAll('.sticker').length;
+      const cnt = document.getElementById(`cnt-${section}`);
+      if (cnt) { cnt.textContent = `${sOwned}/${sTotal}`; cnt.classList.toggle('complete', sOwned === sTotal); }
+
+      const pct = Math.round(sOwned / sTotal * 100);
+      const { fill, bg } = heatColor(pct);
+      const bar = document.getElementById(`hm-${section}`);
+      if (bar) {
+        bar.closest('.hm-card').style.background = bg;
+        bar.style.width = pct + '%'; bar.style.background = fill;
+        const pctEl = bar.closest('.hm-card').querySelector('.hm-pct');
+        if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = fill; }
+        const countEl = document.getElementById(`hmc-${section}`);
+        if (countEl) countEl.textContent = `${sOwned}/${sTotal} figuritas`;
+      }
+
+      const gOwned = document.querySelectorAll('.sticker.owned').length;
+      document.getElementById('g-owned').textContent = gOwned;
+      document.getElementById('g-missing').textContent = totalAll - gOwned;
+      document.getElementById('g-bar').style.width = `${(gOwned / totalAll * 100).toFixed(1)}%`;
+    }
 
     document.querySelectorAll('.sticker').forEach(el => el.addEventListener('click', () => toggle(el)));
   </script>
