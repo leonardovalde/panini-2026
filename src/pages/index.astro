@@ -190,7 +190,7 @@ const allSections = [
       <a href="#museum">Museum</a>
     </nav>
     <main>
-      <div class="section" id="intro">
+      <div class="section collapsed" id="intro">
         <div class="section-header" data-toggle="intro">
           <span class="section-flag">🌍</span>
           <h2>Introducción</h2>
@@ -210,7 +210,7 @@ const allSections = [
       {TEAMS.map(t => {
         const teamOwned = t.stickers.filter(s => ownedSet.has(s.id)).length;
         return (
-          <div class="section" id={t.code}>
+          <div class="section collapsed" id={t.code}>
             <div class="section-header" data-toggle={t.code}>
               <span class="section-flag">{t.flag}</span>
               <h2>{t.name}</h2>
@@ -232,7 +232,7 @@ const allSections = [
         );
       })}
 
-      <div class="section" id="museum">
+      <div class="section collapsed" id="museum">
         <div class="section-header" data-toggle="museum">
           <span class="section-flag">🏆</span>
           <h2>FIFA Museum</h2>
