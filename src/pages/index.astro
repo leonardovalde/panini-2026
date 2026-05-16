@@ -39,15 +39,21 @@ const allSections = [
     .global-stats strong { color: #94a3b8; }
     .progress-bar { width: 100%; margin: 0.35rem auto 0; height: 4px; background: #1e293b; border-radius: 2px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 2px; transition: width 0.3s; }
-    .tabs { display: flex; background: #0f172a; border-bottom: 1px solid #1e293b; position: sticky; top: 82px; z-index: 99; }
-    .tab { flex: 1; padding: 0.55rem; text-align: center; font-size: 0.78rem; font-weight: 600; color: #475569; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
-    .tab.active { color: #38bdf8; border-bottom-color: #38bdf8; }
-    nav { display: flex; overflow-x: auto; gap: 0.4rem; padding: 0.45rem 0.75rem; background: #0f172a; border-bottom: 1px solid #1e293b; position: sticky; top: 120px; z-index: 98; scrollbar-width: none; }
+    .hamburger { position: absolute; top: 0.7rem; left: 0.75rem; background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; padding: 0.2rem; }
+    .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; }
+    .drawer-overlay.open { display: block; }
+    .drawer { position: fixed; top: 0; left: 0; height: 100%; width: 220px; background: #1e293b; z-index: 151; transform: translateX(-100%); transition: transform 0.25s; padding: 1.5rem 0; }
+    .drawer.open { transform: translateX(0); }
+    .drawer-title { font-size: 0.7rem; color: #475569; padding: 0 1.25rem 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .drawer-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.25rem; font-size: 0.9rem; color: #94a3b8; cursor: pointer; transition: background 0.1s; }
+    .drawer-item:active, .drawer-item.active { background: #0f172a; color: #f1f5f9; }
+    .drawer-item.active { border-left: 3px solid #38bdf8; padding-left: calc(1.25rem - 3px); }
+    nav { display: flex; overflow-x: auto; gap: 0.4rem; padding: 0.45rem 0.75rem; background: #0f172a; border-bottom: 1px solid #1e293b; position: sticky; top: 82px; z-index: 98; scrollbar-width: none; }
     nav::-webkit-scrollbar { display: none; }
     nav a { flex-shrink: 0; font-size: 0.68rem; padding: 0.25rem 0.55rem; border-radius: 20px; background: #1e293b; color: #64748b; text-decoration: none; white-space: nowrap; border: 1px solid #334155; }
     nav a:active { background: #334155; color: #e2e8f0; }
     main { padding: 0.75rem; }
-    .section { margin-bottom: 1.5rem; scroll-margin-top: 165px; }
+    .section { margin-bottom: 1.5rem; scroll-margin-top: 120px; }
     .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid #1e293b; cursor: pointer; }
     .section-header h2 { font-size: 0.88rem; font-weight: 700; color: #e2e8f0; }
     .section-flag { font-size: 1.2rem; line-height: 1; }
@@ -131,6 +137,7 @@ const allSections = [
   <div class="app">
   <header>
 
+    <button class="hamburger" id="hamburger">☰</button>
     <h1>✨ Álbum de Leo & Gabi ✨</h1>
     <p>⚽ Panini FIFA World Cup 2026™</p>
     <div class="global-stats">
@@ -143,10 +150,12 @@ const allSections = [
     </div>
   </header>
 
-  <div class="tabs">
-    <div class="tab active" id="tab-stickers" data-tab="stickers">🗂 Stickers</div>
-    <div class="tab" id="tab-heatmap" data-tab="heatmap">🌡 Por país</div>
-    <div class="tab" id="tab-scan" data-tab="scan">📷 Escanear</div>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-title">Menú</div>
+    <div class="drawer-item active" data-tab="stickers">🗂 Stickers</div>
+    <div class="drawer-item" data-tab="heatmap">🌡 Por país</div>
+    <div class="drawer-item" data-tab="scan">📷 Escanear</div>
   </div>
 
   <nav id="team-nav">
@@ -293,6 +302,16 @@ const allSections = [
       header.addEventListener('click', () => header.closest('.section').classList.toggle('collapsed'));
     });
 
+    // HAMBURGER
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('drawer-overlay');
+    document.getElementById('hamburger').addEventListener('click', () => {
+      drawer.classList.add('open'); overlay.classList.add('open');
+    });
+    overlay.addEventListener('click', () => {
+      drawer.classList.remove('open'); overlay.classList.remove('open');
+    });
+
     // TABS
     function switchTab(tab) {
       document.getElementById('view-stickers').classList.toggle('hidden', tab !== 'stickers');
@@ -300,11 +319,10 @@ const allSections = [
       document.getElementById('view-heatmap').classList.toggle('hidden', tab !== 'heatmap');
       document.getElementById('view-heatmap').classList.toggle('visible', tab === 'heatmap');
       document.getElementById('view-scan').classList.toggle('visible', tab === 'scan');
-      document.getElementById('tab-stickers').classList.toggle('active', tab === 'stickers');
-      document.getElementById('tab-heatmap').classList.toggle('active',  tab === 'heatmap');
-      document.getElementById('tab-scan').classList.toggle('active',     tab === 'scan');
+      document.querySelectorAll('.drawer-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+      drawer.classList.remove('open'); overlay.classList.remove('open');
     }
-    document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => switchTab(el.dataset.tab)));
+    document.querySelectorAll('.drawer-item').forEach(el => el.addEventListener('click', () => switchTab(el.dataset.tab)));
     document.querySelectorAll('[data-goto]').forEach(el => {
       el.addEventListener('click', () => {
         switchTab('stickers');
