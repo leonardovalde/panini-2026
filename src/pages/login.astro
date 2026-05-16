@@ -9,15 +9,15 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: system-ui, sans-serif;
-      background: #3B3758;
-      color: #f0f4f8;
+      background: #0f172a;
+      color: #e2e8f0;
       min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .card {
-      background: #4D6E81;
+      background: #1e293b;
       border-radius: 16px;
       padding: 2rem 1.5rem;
       width: 100%;
@@ -26,17 +26,17 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
     h1 { font-size: 1.1rem; margin-bottom: 0.25rem; }
-    p { font-size: 0.8rem; color: #8DA9B8; margin-bottom: 1.5rem; }
+    p { font-size: 0.8rem; color: #64748b; margin-bottom: 1.5rem; }
 
     .dots {
       display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 1.5rem;
     }
     .dot {
       width: 14px; height: 14px; border-radius: 50%;
-      background: #4D6E81; border: 2px solid #7AACB3;
+      background: #334155; border: 2px solid #475569;
       transition: background 0.15s;
     }
-    .dot.filled { background: #7AACB3; border-color: #7AACB3; }
+    .dot.filled { background: #38bdf8; border-color: #38bdf8; }
 
     .keypad {
       display: grid;
@@ -44,10 +44,10 @@
       gap: 0.6rem;
     }
     button {
-      background: #4D6E81;
+      background: #334155;
       border: none;
       border-radius: 12px;
-      color: #f0f4f8;
+      color: #f1f5f9;
       font-size: 1.4rem;
       font-weight: 600;
       padding: 1rem;
@@ -55,9 +55,9 @@
       transition: background 0.1s, transform 0.1s;
       -webkit-tap-highlight-color: transparent;
     }
-    button:active { background: #7AACB3; transform: scale(0.95); }
-    button.del { font-size: 1rem; color: #CBD5E0; }
-    .error { color: #CF8DA8; font-size: 0.8rem; margin-top: 0.75rem; min-height: 1.2em; }
+    button:active { background: #475569; transform: scale(0.95); }
+    button.del { font-size: 1rem; color: #94a3b8; }
+    .error { color: #f87171; font-size: 0.8rem; margin-top: 0.75rem; min-height: 1.2em; }
   </style>
 </head>
 <body>

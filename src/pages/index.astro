@@ -29,37 +29,37 @@ const allSections = [
   <title>Álbum Leo & Gabi 2026</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #3B3758; color: #f0f4f8; min-height: 100dvh; -webkit-tap-highlight-color: transparent; }
-    .app { max-width: 480px; margin: 0 auto; background: #3B3758; }
-    header { background: #3B3758; padding: 0.7rem 1rem 0.5rem; text-align: center; border-bottom: 1px solid #4D6E81; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100dvh; -webkit-tap-highlight-color: transparent; }
+    .app { max-width: 480px; margin: 0 auto; background: #0f172a; }
+    header { background: #0f172a; padding: 0.7rem 1rem 0.5rem; text-align: center; border-bottom: 1px solid #1e293b; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
     header h1 { font-size: 1rem; font-weight: 800; color: #f1f5f9; }
-    header p { font-size: 0.68rem; color: #7AACB3; margin-top: 0.1rem; }
-    .logout { position: absolute; top: 0.6rem; right: 0.75rem; font-size: 0.68rem; color: #7AACB3; text-decoration: none; }
-    .global-stats { display: flex; gap: 1rem; justify-content: center; margin-top: 0.3rem; font-size: 0.72rem; color: #8DA9B8; }
-    .global-stats strong { color: #CBD5E0; }
-    .progress-bar { width: 100%; margin: 0.35rem auto 0; height: 4px; background: #4D6E81; border-radius: 2px; overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #7AACB3, #CF8DA8); border-radius: 2px; transition: width 0.3s; }
-    .hamburger { position: absolute; top: 0.7rem; left: 0.75rem; background: none; border: none; color: #CBD5E0; font-size: 1.3rem; cursor: pointer; padding: 0.2rem; }
+    header p { font-size: 0.68rem; color: #475569; margin-top: 0.1rem; }
+    .logout { position: absolute; top: 0.6rem; right: 0.75rem; font-size: 0.68rem; color: #475569; text-decoration: none; }
+    .global-stats { display: flex; gap: 1rem; justify-content: center; margin-top: 0.3rem; font-size: 0.72rem; color: #64748b; }
+    .global-stats strong { color: #94a3b8; }
+    .progress-bar { width: 100%; margin: 0.35rem auto 0; height: 4px; background: #1e293b; border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 2px; transition: width 0.3s; }
+    .hamburger { position: absolute; top: 0.7rem; left: 0.75rem; background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; padding: 0.2rem; }
     .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; }
     .drawer-overlay.open { display: block; }
-    .drawer { position: fixed; top: 0; left: 0; height: 100%; width: 220px; background: #4D6E81; z-index: 151; transform: translateX(-100%); transition: transform 0.25s; padding: 1.5rem 0; }
+    .drawer { position: fixed; top: 0; left: 0; height: 100%; width: 220px; background: #1e293b; z-index: 151; transform: translateX(-100%); transition: transform 0.25s; padding: 1.5rem 0; }
     .drawer.open { transform: translateX(0); }
-    .drawer-title { font-size: 0.7rem; color: #7AACB3; padding: 0 1.25rem 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; }
-    .drawer-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.25rem; font-size: 0.9rem; color: #CBD5E0; cursor: pointer; transition: background 0.1s; }
-    .drawer-item:active, .drawer-item.active { background: #3B3758; color: #f1f5f9; }
-    .drawer-item.active { border-left: 3px solid #7AACB3; padding-left: calc(1.25rem - 3px); }
-    nav { display: flex; overflow-x: auto; gap: 0.4rem; padding: 0.45rem 0.75rem; background: #3B3758; border-bottom: 1px solid #4D6E81; position: sticky; top: 82px; z-index: 98; scrollbar-width: none; }
+    .drawer-title { font-size: 0.7rem; color: #475569; padding: 0 1.25rem 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .drawer-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.25rem; font-size: 0.9rem; color: #94a3b8; cursor: pointer; transition: background 0.1s; }
+    .drawer-item:active, .drawer-item.active { background: #0f172a; color: #f1f5f9; }
+    .drawer-item.active { border-left: 3px solid #38bdf8; padding-left: calc(1.25rem - 3px); }
+    nav { display: flex; overflow-x: auto; gap: 0.4rem; padding: 0.45rem 0.75rem; background: #0f172a; border-bottom: 1px solid #1e293b; position: sticky; top: 82px; z-index: 98; scrollbar-width: none; }
     nav::-webkit-scrollbar { display: none; }
-    nav a { flex-shrink: 0; font-size: 0.68rem; padding: 0.25rem 0.55rem; border-radius: 20px; background: #4D6E81; color: #8DA9B8; text-decoration: none; white-space: nowrap; border: 1px solid #4D6E81; }
-    nav a:active { background: #4D6E81; color: #f0f4f8; }
+    nav a { flex-shrink: 0; font-size: 0.68rem; padding: 0.25rem 0.55rem; border-radius: 20px; background: #1e293b; color: #64748b; text-decoration: none; white-space: nowrap; border: 1px solid #334155; }
+    nav a:active { background: #334155; color: #e2e8f0; }
     main { padding: 0.75rem; }
     .section { margin-bottom: 1.5rem; scroll-margin-top: 120px; }
-    .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid #4D6E81; cursor: pointer; }
-    .section-header h2 { font-size: 0.88rem; font-weight: 700; color: #f0f4f8; }
+    .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid #1e293b; cursor: pointer; }
+    .section-header h2 { font-size: 0.88rem; font-weight: 700; color: #e2e8f0; }
     .section-flag { font-size: 1.2rem; line-height: 1; }
-    .section-count { margin-left: auto; font-size: 0.68rem; color: #7AACB3; }
-    .section-count.complete { color: #CF8DA8; font-weight: 700; }
-    .section-header .chevron { margin-left: 0.3rem; font-size: 0.7rem; color: #7AACB3; transition: transform 0.2s; }
+    .section-count { margin-left: auto; font-size: 0.68rem; color: #475569; }
+    .section-count.complete { color: #4ade80; font-weight: 700; }
+    .section-header .chevron { margin-left: 0.3rem; font-size: 0.7rem; color: #475569; transition: transform 0.2s; }
     .section.collapsed .sticker-grid { display: none; }
     .section.collapsed .chevron { transform: rotate(-90deg); }
     .sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
@@ -69,12 +69,12 @@ const allSections = [
     .sticker:active { transform: scale(0.91); }
     .sticker .sid { font-size: 0.56rem; font-weight: 700; line-height: 1; }
     .sticker .sname { font-size: 0.4rem; line-height: 1.15; text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 1px; }
-    .sticker.owned   { background: #AA5376; border-color: #CF8DA8; color: #fce7f3; }
-    .sticker.missing { background: #4D6E81; border-color: #4D6E81; color: #7AACB3; }
+    .sticker.owned   { background: #166534; border-color: #4ade80; color: #bbf7d0; }
+    .sticker.missing { background: #1e293b; border-color: #334155; color: #475569; }
     .sticker.foil.owned   { background: linear-gradient(135deg, #854d0e, #ca8a04); border-color: #fbbf24; color: #fef9c3; }
     .sticker.foil.missing { background: #1c1917; border-color: #44403c; color: #57534e; }
-    .sticker.photo.owned   { background: #4D6E81; border-color: #7AACB3; color: #e0f2fe; }
-    .sticker.photo.missing { background: #0f1f33; border-color: #4D6E81; color: #4D6E81; }
+    .sticker.photo.owned   { background: #1e3a5f; border-color: #38bdf8; color: #bae6fd; }
+    .sticker.photo.missing { background: #0f1f33; border-color: #1e3a5f; color: #334155; }
     #view-heatmap { display: none; }
     #view-heatmap.visible { display: block; }
     .hidden { display: none !important; }
@@ -84,34 +84,34 @@ const allSections = [
     .hm-card { border-radius: 10px; padding: 0.6rem 0.5rem 0.5rem; display: flex; flex-direction: column; gap: 0.3rem; border: 1px solid rgba(255,255,255,0.06); cursor: pointer; }
     .hm-top { display: flex; align-items: center; gap: 0.4rem; }
     .hm-flag { font-size: 1.3rem; line-height: 1; }
-    .hm-name { font-size: 0.7rem; font-weight: 700; color: #f0f4f8; line-height: 1.2; }
+    .hm-name { font-size: 0.7rem; font-weight: 700; color: #e2e8f0; line-height: 1.2; }
     .hm-pct { margin-left: auto; font-size: 0.75rem; font-weight: 800; }
     .hm-bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
     .hm-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
-    .hm-count { font-size: 0.6rem; color: #8DA9B8; }
-    .fab { position: fixed; bottom: 1.25rem; right: max(1.25rem, calc(50vw - 240px + 1.25rem)); z-index: 200; width: 52px; height: 52px; border-radius: 50%; background: #7AACB3; color: #0f172a; border: none; font-size: 1.3rem; cursor: pointer; box-shadow: 0 4px 14px rgba(56,189,248,0.4); display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
+    .hm-count { font-size: 0.6rem; color: #64748b; }
+    .fab { position: fixed; bottom: 1.25rem; right: max(1.25rem, calc(50vw - 240px + 1.25rem)); z-index: 200; width: 52px; height: 52px; border-radius: 50%; background: #38bdf8; color: #0f172a; border: none; font-size: 1.3rem; cursor: pointer; box-shadow: 0 4px 14px rgba(56,189,248,0.4); display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
     .search-overlay { display: none; position: fixed; inset: 0; z-index: 199; background: rgba(0,0,0,0.6); align-items: flex-start; justify-content: center; padding-top: 5rem; }
     .search-overlay.open { display: flex; }
-    .search-box { background: #4D6E81; border-radius: 14px; padding: 1rem; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-    .search-box input { width: 100%; border: 1.5px solid #4D6E81; border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 1rem; outline: none; color: #f0f4f8; background: #3B3758; }
-    .search-box input:focus { border-color: #7AACB3; }
+    .search-box { background: #1e293b; border-radius: 14px; padding: 1rem; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+    .search-box input { width: 100%; border: 1.5px solid #334155; border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 1rem; outline: none; color: #e2e8f0; background: #0f172a; }
+    .search-box input:focus { border-color: #38bdf8; }
     .search-results { margin-top: 0.6rem; max-height: 50vh; overflow-y: auto; }
-    .search-result { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: #f0f4f8; margin-bottom: 3px; }
-    .search-result.owned   { background: #AA5376; color: #fce7f3; }
-    .search-result.missing { background: #4D6E81; color: #CBD5E0; }
+    .search-result { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: #e2e8f0; margin-bottom: 3px; }
+    .search-result.owned   { background: #166534; color: #bbf7d0; }
+    .search-result.missing { background: #1e293b; color: #94a3b8; }
     .search-result:active { filter: brightness(1.2); }
     .search-result .sr-id { font-weight: 700; min-width: 52px; font-size: 0.75rem; }
-    .search-empty { font-size: 0.8rem; color: #7AACB3; text-align: center; padding: 1rem; }
+    .search-empty { font-size: 0.8rem; color: #475569; text-align: center; padding: 1rem; }
 
     /* scan view */
     #view-scan { display: none; padding: 1rem; }
     #view-scan.visible { display: block; }
-    .scan-drop { border: 2px dashed #4D6E81; border-radius: 12px; padding: 2rem 1rem; text-align: center; cursor: pointer; color: #8DA9B8; font-size: 0.85rem; transition: border-color 0.15s; }
-    .scan-drop:active { border-color: #7AACB3; }
+    .scan-drop { border: 2px dashed #334155; border-radius: 12px; padding: 2rem 1rem; text-align: center; cursor: pointer; color: #64748b; font-size: 0.85rem; transition: border-color 0.15s; }
+    .scan-drop:active { border-color: #38bdf8; }
     .scan-preview { width: 100%; border-radius: 10px; margin-top: 0.75rem; display: none; min-height: 40px; }
     .scan-preview.visible { display: block; }
-    .scan-preview:not([src]), .scan-preview[src=""] { display: flex; align-items: center; justify-content: center; background: #4D6E81; color: #8DA9B8; font-size: 0.8rem; padding: 1rem; border-radius: 10px; }
-    .scan-btn { width: 100%; margin-top: 0.75rem; padding: 0.7rem; background: #7AACB3; color: #0f172a; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: none; }
+    .scan-preview:not([src]), .scan-preview[src=""] { display: flex; align-items: center; justify-content: center; background: #1e293b; color: #64748b; font-size: 0.8rem; padding: 1rem; border-radius: 10px; }
+    .scan-btn { width: 100%; margin-top: 0.75rem; padding: 0.7rem; background: #38bdf8; color: #0f172a; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: none; }
     .scan-btn.visible { display: block; }
     .scan-results { margin-top: 1rem; }
     .scan-group { margin-bottom: 0.75rem; }
@@ -121,14 +121,14 @@ const allSections = [
     .scan-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 0.5rem; }
     @media (min-width: 400px) { .scan-grid { grid-template-columns: repeat(6, 1fr); } }
     .scan-card { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 7px; border: 1.5px solid transparent; padding: 3px; }
-    .scan-card.owned   { background: #AA5376; border-color: #CF8DA8; color: #fce7f3; }
+    .scan-card.owned   { background: #166534; border-color: #4ade80; color: #bbf7d0; }
     .scan-card.missing { background: #3b0f0f; border-color: #f87171; color: #fecaca; }
     .scan-card .sc-code { font-size: 0.56rem; font-weight: 700; line-height: 1; }
     .scan-card .sc-name { font-size: 0.4rem; line-height: 1.15; text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 1px; }
-    .scan-loading { text-align: center; color: #8DA9B8; font-size: 0.85rem; padding: 1rem; }
+    .scan-loading { text-align: center; color: #64748b; font-size: 0.85rem; padding: 1rem; }
     .search-result { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin-bottom: 3px; }
-    .search-result.owned   { background: #AA5376; color: #fce7f3; }
-    .search-result.missing { background: #4D6E81; color: #CBD5E0; }
+    .search-result.owned   { background: #166534; color: #bbf7d0; }
+    .search-result.missing { background: #1e293b; color: #94a3b8; }
     .search-result:active { filter: brightness(1.2); }
     .search-result .sr-id { font-weight: 700; min-width: 52px; font-size: 0.75rem; }
   </style>
@@ -275,8 +275,8 @@ const allSections = [
   <!-- SCAN VIEW -->
   <div id="view-scan">
     <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-      <button style="flex:1;padding:0.65rem;background:#4D6E81;color:#f0f4f8;border:1px solid #4D6E81;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-camera">📷 Cámara</button>
-      <button style="flex:1;padding:0.65rem;background:#4D6E81;color:#f0f4f8;border:1px solid #4D6E81;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-file">🖼 Archivo</button>
+      <button style="flex:1;padding:0.65rem;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-camera">📷 Cámara</button>
+      <button style="flex:1;padding:0.65rem;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-file">🖼 Archivo</button>
     </div>
     <input type="file" id="scan-input-camera" accept="image/*" capture="environment" style="display:none" />
     <input type="file" id="scan-input-file" accept="image/*" style="display:none" />
@@ -484,15 +484,15 @@ const allSections = [
 
       const total = data.owned.length + data.new.length;
       results.innerHTML = `
-        <p style="font-size:0.8rem;color:#CBD5E0;margin-bottom:0.6rem">
+        <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">
           ${total} carta${total !== 1 ? 's' : ''} detectada${total !== 1 ? 's' : ''}
-          · <span style="color:#CF8DA8">${data.owned.length} ya tenés</span>
+          · <span style="color:#4ade80">${data.owned.length} ya tenés</span>
           · <span style="color:#f87171">${data.new.length} nueva${data.new.length !== 1 ? 's' : ''}</span>
         </p>
         <div class="scan-grid">
           ${[...data.owned.map(c => stickerLabel(c, true)), ...data.new.map(c => stickerLabel(c, false))].join('')}
         </div>
-        ${data.unknown.length ? `<p style="font-size:0.7rem;color:#7AACB3;margin-top:0.5rem">No reconocidas: ${data.unknown.join(', ')}</p>` : ''}
+        ${data.unknown.length ? `<p style="font-size:0.7rem;color:#475569;margin-top:0.5rem">No reconocidas: ${data.unknown.join(', ')}</p>` : ''}
       `;
 
       // Click to mark missing stickers
@@ -524,7 +524,7 @@ const allSections = [
           const missing = results.querySelectorAll('.scan-card.missing').length;
           const total = owned + missing;
           const p = results.querySelector('p');
-          if (p) p.innerHTML = `${total} carta${total!==1?'s':''} detectada${total!==1?'s':''} · <span style="color:#CF8DA8">${owned} ya tenés</span> · <span style="color:#f87171">${missing} nueva${missing!==1?'s':''}</span>`;
+          if (p) p.innerHTML = `${total} carta${total!==1?'s':''} detectada${total!==1?'s':''} · <span style="color:#4ade80">${owned} ya tenés</span> · <span style="color:#f87171">${missing} nueva${missing!==1?'s':''}</span>`;
         });
       });
     });
