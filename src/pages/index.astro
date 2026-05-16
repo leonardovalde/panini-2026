@@ -90,12 +90,11 @@ const allSections = [
     .search-box input { width: 100%; border: 1.5px solid #334155; border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 1rem; outline: none; color: #e2e8f0; background: #0f172a; }
     .search-box input:focus { border-color: #38bdf8; }
     .search-results { margin-top: 0.6rem; max-height: 50vh; overflow-y: auto; }
-    .search-result { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.4rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: #e2e8f0; }
-    .search-result:active { background: #334155; }
-    .search-result .sr-id { font-weight: 700; color: #38bdf8; min-width: 52px; font-size: 0.75rem; }
-    .search-result .sr-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .search-result .sr-dot.owned { background: #4ade80; }
-    .search-result .sr-dot.missing { background: #334155; }
+    .search-result { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: #e2e8f0; margin-bottom: 3px; }
+    .search-result.owned   { background: #166534; color: #bbf7d0; }
+    .search-result.missing { background: #1e293b; color: #94a3b8; }
+    .search-result:active { filter: brightness(1.2); }
+    .search-result .sr-id { font-weight: 700; min-width: 52px; font-size: 0.75rem; }
     .search-empty { font-size: 0.8rem; color: #475569; text-align: center; padding: 1rem; }
 
     /* scan view */
@@ -333,8 +332,7 @@ const allSections = [
       const matches = allStickers.filter(s => s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)).slice(0, 20);
       if (!matches.length) { results.innerHTML = '<div class="search-empty">Sin resultados</div>'; return; }
       results.innerHTML = matches.map((s, i) =>
-        `<div class="search-result" data-idx="${i}">
-          <span class="sr-dot ${s.el.classList.contains('owned') ? 'owned' : 'missing'}"></span>
+        `<div class="search-result ${s.el.classList.contains('owned') ? 'owned' : 'missing'}" data-idx="${i}">
           <span class="sr-id">${s.id}</span>
           <span>${s.name}</span>
         </div>`
