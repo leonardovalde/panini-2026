@@ -454,7 +454,8 @@ const allSections = [
       function stickerLabel(code, isOwned) {
         const el = document.querySelector(`.sticker[data-id="${code}"]`);
         const name = el?.querySelector('.sname')?.textContent?.trim() || code;
-        return `<div class="scan-card ${isOwned ? 'owned' : 'missing'}">
+        const clickable = !isOwned ? `data-mark="${code}" style="cursor:pointer"` : '';
+        return `<div class="scan-card ${isOwned ? 'owned' : 'missing'}" ${clickable}>
           <div class="sc-code">${code}</div>
           <div class="sc-name">${name}</div>
         </div>`;
@@ -472,6 +473,39 @@ const allSections = [
         </div>
         ${data.unknown.length ? `<p style="font-size:0.7rem;color:#475569;margin-top:0.5rem">No reconocidas: ${data.unknown.join(', ')}</p>` : ''}
       `;
+
+      // Click to mark missing stickers
+      results.querySelectorAll('[data-mark]').forEach(card => {
+        card.addEventListener('click', async () => {
+          const id = card.dataset.mark;
+          await fetch('/api/sticker', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, owned: true }),
+          });
+          card.classList.replace('missing', 'owned');
+          card.removeAttribute('data-mark');
+          card.style.cursor = '';
+          // also update main grid
+          const mainSticker = document.querySelector(`.sticker[data-id="${id}"]`);
+          if (mainSticker) {
+            mainSticker.classList.replace('missing', 'owned');
+            // trigger counter update manually
+            const section = mainSticker.dataset.section;
+            const grid = mainSticker.closest('.sticker-grid');
+            const sOwned = grid.querySelectorAll('.sticker.owned').length;
+            const sTotal = grid.querySelectorAll('.sticker').length;
+            const cnt = document.getElementById(`cnt-${section}`);
+            if (cnt) { cnt.textContent = `${sOwned}/${sTotal}`; cnt.classList.toggle('complete', sOwned === sTotal); }
+          }
+          // update summary line
+          const owned = results.querySelectorAll('.scan-card.owned').length;
+          const missing = results.querySelectorAll('.scan-card.missing').length;
+          const total = owned + missing;
+          const p = results.querySelector('p');
+          if (p) p.innerHTML = `${total} carta${total!==1?'s':''} detectada${total!==1?'s':''} · <span style="color:#4ade80">${owned} ya tenés</span> · <span style="color:#f87171">${missing} nueva${missing!==1?'s':''}</span>`;
+        });
+      });
     });
   </script>
   </div><!-- .app -->
