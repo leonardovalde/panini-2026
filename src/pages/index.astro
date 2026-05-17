@@ -306,10 +306,23 @@ const allSections = [
 
   <!-- REPEATED VIEW -->
   <div id="view-repeated">
-    <input class="rep-search" id="rep-search" type="text" placeholder="Buscar repetida..." autocomplete="off" />
+    <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
+      <input class="rep-search" id="rep-search" type="text" placeholder="Buscar en repetidas..." autocomplete="off" style="flex:1;margin:0" />
+      <button id="rep-add-open" style="padding:0.5rem 0.75rem;background:#1e293b;color:#38bdf8;border:1.5px solid #334155;border-radius:8px;font-size:0.85rem;cursor:pointer;white-space:nowrap">+ Agregar</button>
+    </div>
+
+    <!-- add modal -->
+    <div id="rep-add-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:flex-start;justify-content:center;padding-top:4rem">
+      <div style="background:#1e293b;border-radius:14px;padding:1rem;width:90%;max-width:380px">
+        <input id="rep-add-search" type="text" placeholder="Buscar sticker..." autocomplete="off"
+          style="width:100%;border:1.5px solid #334155;border-radius:8px;padding:0.6rem 0.75rem;font-size:1rem;background:#0f172a;color:#e2e8f0;outline:none;margin-bottom:0.5rem" />
+        <div id="rep-add-results" style="max-height:50vh;overflow-y:auto"></div>
+      </div>
+    </div>
+
     <div id="rep-list">
       {repeatedStickers.length === 0
-        ? <p class="rep-empty">No tenés repetidas aún.<br/><small>Mantén presionado un sticker para agregar repetida.</small></p>
+        ? <p class="rep-empty">No tenés repetidas aún.</p>
         : Object.entries(repeatedBySection).map(([section, { flag, items }]) => (
           <div class="section">
             <div class="section-header" style="cursor:default">
@@ -525,6 +538,40 @@ const allSections = [
       document.querySelectorAll('#rep-list .rep-sticker').forEach(row => {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+
+    // add modal
+    const addModal = document.getElementById('rep-add-modal');
+    document.getElementById('rep-add-open').addEventListener('click', () => {
+      addModal.style.display = 'flex';
+      setTimeout(() => document.getElementById('rep-add-search').focus(), 50);
+    });
+    addModal.addEventListener('click', e => { if (e.target === addModal) addModal.style.display = 'none'; });
+
+    const allStickersList = Array.from(document.querySelectorAll('.sticker')).map(el => ({
+      id: el.dataset.id,
+      name: el.querySelector('.sname')?.textContent?.trim() ?? '',
+    }));
+
+    document.getElementById('rep-add-search').addEventListener('input', e => {
+      const q = e.target.value.trim().toLowerCase();
+      const container = document.getElementById('rep-add-results');
+      if (!q) { container.innerHTML = ''; return; }
+      const matches = allStickersList.filter(s => s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)).slice(0, 15);
+      container.innerHTML = matches.map(s =>
+        `<div data-add-id="${s.id}" style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.4rem;border-radius:8px;cursor:pointer;color:#e2e8f0">
+          <span style="font-weight:700;color:#38bdf8;min-width:52px;font-size:0.75rem">${s.id}</span>
+          <span style="font-size:0.85rem">${s.name}</span>
+        </div>`
+      ).join('');
+      container.querySelectorAll('[data-add-id]').forEach(row => {
+        row.addEventListener('click', async () => {
+          await changeRepeated(row.dataset.addId, 1);
+          addModal.style.display = 'none';
+          document.getElementById('rep-add-search').value = '';
+          container.innerHTML = '';
+        });
       });
     });
 
