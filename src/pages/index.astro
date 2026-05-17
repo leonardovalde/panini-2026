@@ -3,13 +3,26 @@ import { getPool, initDB } from '../lib/db';
 import { INTRO, FIFA_MUSEUM, TEAMS, COCA_COLA } from '../lib/stickers';
 
 await initDB();
-const { rows } = await getPool().query('SELECT id, owned FROM stickers');
+const { rows } = await getPool().query('SELECT id, owned, repeated FROM stickers');
 const ownedSet = new Set(rows.filter(r => r.owned).map(r => r.id));
+const repeatedMap = new Map(rows.filter(r => r.repeated > 0).map(r => [r.id, r.repeated as number]));
 
 const totalAll = rows.length;
 const totalOwned = ownedSet.size;
 
-// precompute per-section stats for heatmap
+// precompute repeated stickers grouped by section
+const allWithSection = [
+  ...INTRO.map(s => ({ ...s, section: 'Introducción', flag: '🌍' })),
+  ...TEAMS.flatMap(t => t.stickers.map(s => ({ ...s, section: t.name, flag: t.flag }))),
+  ...FIFA_MUSEUM.map(s => ({ ...s, section: 'FIFA Museum', flag: '🏆' })),
+  ...COCA_COLA.map(s => ({ ...s, section: 'Coca-Cola', flag: '🥤' })),
+];
+const repeatedStickers = allWithSection.filter(s => (repeatedMap.get(s.id) ?? 0) > 0);
+const repeatedBySection = repeatedStickers.reduce((acc, s) => {
+  if (!acc[s.section]) acc[s.section] = { flag: s.flag, items: [] };
+  acc[s.section].items.push(s);
+  return acc;
+}, {} as Record<string, { flag: string; items: typeof allWithSection }>);
 const allSections = [
   { code: 'intro', name: 'Introducción', flag: '🌍', stickers: INTRO },
   ...TEAMS.map(t => ({ code: t.code, name: t.name, flag: t.flag, stickers: t.stickers })),
@@ -103,6 +116,24 @@ const allSections = [
     .search-result .sr-id { font-weight: 700; min-width: 52px; font-size: 0.75rem; }
     .search-empty { font-size: 0.8rem; color: #475569; text-align: center; padding: 1rem; }
 
+    /* repeated view */
+    #view-repeated { display: none; padding: 0.75rem; }
+    #view-repeated.visible { display: block; }
+    .rep-search { width: 100%; border: 1.5px solid #334155; border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 0.9rem; background: #1e293b; color: #e2e8f0; outline: none; margin-bottom: 0.75rem; }
+    .rep-search:focus { border-color: #38bdf8; }
+    .rep-empty { text-align: center; color: #475569; font-size: 0.85rem; padding: 2rem 1rem; }
+    .rep-sticker {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 0.6rem; border-radius: 8px;
+      background: #1e293b; border: 1px solid #334155;
+      margin-bottom: 4px;
+    }
+    .rep-sticker .rs-id { font-size: 0.7rem; font-weight: 800; color: #38bdf8; min-width: 52px; }
+    .rep-sticker .rs-name { font-size: 0.82rem; color: #e2e8f0; flex: 1; }
+    .rep-sticker .rs-count { font-size: 0.75rem; font-weight: 700; color: #4ade80; min-width: 24px; text-align: center; }
+    .rep-sticker .rs-del { background: #3b0f0f; border: 1px solid #f87171; color: #f87171; border-radius: 6px; padding: 0.2rem 0.5rem; font-size: 0.75rem; cursor: pointer; }
+    .rep-add-btn { width: 100%; padding: 0.65rem; background: #1e293b; color: #38bdf8; border: 1.5px dashed #334155; border-radius: 10px; font-size: 0.85rem; cursor: pointer; margin-bottom: 0.75rem; }
+
     /* scan view */
     #view-scan { display: none; padding: 1rem; }
     #view-scan.visible { display: block; }
@@ -155,6 +186,7 @@ const allSections = [
     <div class="drawer-title">Menú</div>
     <div class="drawer-item active" data-tab="stickers">🗂 Stickers</div>
     <div class="drawer-item" data-tab="heatmap">🌡 Por país</div>
+    <div class="drawer-item" data-tab="repeated">🔄 Repetidas</div>
     <div class="drawer-item" data-tab="scan">📷 Escanear</div>
   </div>
 
@@ -272,6 +304,33 @@ const allSections = [
     </main>
   </div>
 
+  <!-- REPEATED VIEW -->
+  <div id="view-repeated">
+    <input class="rep-search" id="rep-search" type="text" placeholder="Buscar repetida..." autocomplete="off" />
+    <div id="rep-list">
+      {repeatedStickers.length === 0
+        ? <p class="rep-empty">No tenés repetidas aún.<br/><small>Mantén presionado un sticker para agregar repetida.</small></p>
+        : Object.entries(repeatedBySection).map(([section, { flag, items }]) => (
+          <div class="section">
+            <div class="section-header" style="cursor:default">
+              <span class="section-flag">{flag}</span>
+              <h2>{section}</h2>
+              <span class="section-count">{items.length}</span>
+            </div>
+            {items.map(s => (
+              <div class="rep-sticker" data-rep-id={s.id}>
+                <span class="rs-id">{s.id}</span>
+                <span class="rs-name">{s.name}</span>
+                <span class="rs-count" id={`rc-${s.id}`}>x{repeatedMap.get(s.id)}</span>
+                <button class="rs-del" data-del={s.id}>−</button>
+              </div>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
   <!-- SCAN VIEW -->
   <div id="view-scan">
     <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
@@ -318,6 +377,7 @@ const allSections = [
       document.getElementById('team-nav').classList.toggle('hidden', tab !== 'stickers');
       document.getElementById('view-heatmap').classList.toggle('hidden', tab !== 'heatmap');
       document.getElementById('view-heatmap').classList.toggle('visible', tab === 'heatmap');
+      document.getElementById('view-repeated').classList.toggle('visible', tab === 'repeated');
       document.getElementById('view-scan').classList.toggle('visible', tab === 'scan');
       document.querySelectorAll('.drawer-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
       drawer.classList.remove('open'); overlay.classList.remove('open');
@@ -419,6 +479,54 @@ const allSections = [
     }
 
     document.querySelectorAll('.sticker').forEach(el => el.addEventListener('click', () => toggle(el)));
+
+    // REPEATED
+    async function changeRepeated(id, delta) {
+      const res = await fetch('/api/repeated', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, delta }),
+      });
+      const { repeated } = await res.json();
+      // update count badge on sticker
+      const badge = document.getElementById(`rbadge-${id}`);
+      if (badge) { badge.textContent = repeated > 0 ? `+${repeated}` : ''; badge.style.display = repeated > 0 ? '' : 'none'; }
+      // update repeated view row
+      const row = document.querySelector(`[data-rep-id="${id}"]`);
+      const cnt = document.getElementById(`rc-${id}`);
+      if (repeated <= 0 && row) row.remove();
+      else if (cnt) cnt.textContent = `x${repeated}`;
+      // check if section is now empty
+      document.querySelectorAll('#rep-list .section').forEach(sec => {
+        if (!sec.querySelectorAll('.rep-sticker').length) sec.remove();
+      });
+      if (!document.querySelectorAll('#rep-list .rep-sticker').length) {
+        document.getElementById('rep-list').innerHTML = '<p class="rep-empty">No tenés repetidas aún.</p>';
+      }
+    }
+
+    // + button on each sticker (long press or double tap)
+    document.querySelectorAll('.sticker').forEach(el => {
+      let timer;
+      el.addEventListener('contextmenu', e => { e.preventDefault(); changeRepeated(el.dataset.id, 1); });
+      el.addEventListener('touchstart', () => { timer = setTimeout(() => changeRepeated(el.dataset.id, 1), 600); });
+      el.addEventListener('touchend', () => clearTimeout(timer));
+      el.addEventListener('touchmove', () => clearTimeout(timer));
+    });
+
+    // delete from repeated view
+    document.getElementById('rep-list').addEventListener('click', e => {
+      const btn = e.target.closest('[data-del]');
+      if (btn) changeRepeated(btn.dataset.del, -999);
+    });
+
+    // search in repeated
+    document.getElementById('rep-search').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll('#rep-list .rep-sticker').forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
 
     // SCAN
     let scanFile = null;

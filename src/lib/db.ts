@@ -15,9 +15,12 @@ export async function initDB() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS stickers (
         id TEXT PRIMARY KEY,
-        owned BOOLEAN NOT NULL DEFAULT false
+        owned BOOLEAN NOT NULL DEFAULT false,
+        repeated INTEGER NOT NULL DEFAULT 0
       );
     `);
+    // Add repeated column if missing (migration)
+    await client.query(`ALTER TABLE stickers ADD COLUMN IF NOT EXISTS repeated INTEGER NOT NULL DEFAULT 0`);
     const { rows } = await client.query('SELECT COUNT(*) FROM stickers');
     if (parseInt(rows[0].count) === 0) {
       const all = [
@@ -26,9 +29,9 @@ export async function initDB() {
         ...FIFA_MUSEUM,
         ...COCA_COLA,
       ];
-      const values = all.map((s, i) => `($${i + 1}, false)`).join(',');
+      const values = all.map((s, i) => `($${i + 1}, false, 0)`).join(',');
       const ids = all.map(s => s.id);
-      await client.query(`INSERT INTO stickers (id, owned) VALUES ${values}`, ids);
+      await client.query(`INSERT INTO stickers (id, owned, repeated) VALUES ${values}`, ids);
     }
   } finally {
     client.release();
