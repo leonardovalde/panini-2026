@@ -86,7 +86,7 @@ const allSections = [
     @media (min-width: 600px) { .sticker-grid { grid-template-columns: repeat(8, 1fr); } }
     .sticker { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 7px; cursor: pointer; border: 1.5px solid transparent; transition: transform 0.08s; user-select: none; padding: 3px; position: relative; }
     .sticker:active { transform: scale(0.91); }
-    .rbadge { position: absolute; top: 2px; right: 2px; background: #38bdf8; color: #fff; font-size: 0.45rem; font-weight: 800; min-width: 14px; height: 14px; border-radius: 7px; display: flex; align-items: center; justify-content: center; padding: 0 3px; pointer-events: none; z-index: 1; }
+    .rbadge { position: absolute; top: 2px; right: 2px; background: #38bdf8; color: #fff; font-size: 0.45rem; font-weight: 800; min-width: 14px; height: 14px; border-radius: 7px; display: none; align-items: center; justify-content: center; padding: 0 3px; pointer-events: none; z-index: 1; }
     .rep-popup { position: fixed; z-index: 210; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 0.6rem; display: flex; align-items: center; gap: 0.75rem; }
     .rep-popup button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .rep-popup button:active { background: #e2e8f0; }
@@ -181,6 +181,7 @@ const allSections = [
     .rep-popup button:active { background: #e2e8f0; }
     .rep-popup .rp-count { font-size: 1rem; font-weight: 800; min-width: 24px; text-align: center; color: #1e293b; }
     .rep-popup .rp-label { font-size: 0.65rem; color: #64748b; }
+    .rbadge { position: absolute; top: 2px; right: 2px; background: #38bdf8; color: #fff; font-size: 0.45rem; font-weight: 800; min-width: 14px; height: 14px; border-radius: 7px; display: flex; align-items: center; justify-content: center; padding: 0 3px; pointer-events: none; z-index: 1; }
   </style>
 </head>
 <body>
