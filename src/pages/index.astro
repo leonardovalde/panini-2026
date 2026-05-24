@@ -176,6 +176,11 @@ const allSections = [
     .search-result.missing { background: #ffffff; color: #94a3b8; }
     .search-result:active { filter: brightness(1.2); }
     .search-result .sr-id { font-weight: 700; min-width: 52px; font-size: 0.75rem; }
+    .rep-popup { position: fixed; z-index: 210; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 0.6rem; display: flex; align-items: center; gap: 0.75rem; }
+    .rep-popup button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .rep-popup button:active { background: #e2e8f0; }
+    .rep-popup .rp-count { font-size: 1rem; font-weight: 800; min-width: 24px; text-align: center; color: #1e293b; }
+    .rep-popup .rp-label { font-size: 0.65rem; color: #64748b; }
   </style>
 </head>
 <body>
@@ -475,10 +480,12 @@ const allSections = [
       fabEdit.classList.remove('mode-edit', 'mode-repeat');
       if (mode === 'edit') fabEdit.classList.add('mode-edit');
       if (mode === 'repeat') fabEdit.classList.add('mode-repeat');
+      console.log('[MODE]', mode);
     });
 
     // TOGGLE STICKER
     async function toggle(el) {
+      console.log('[TOGGLE] mode=', mode, 'id=', el.dataset.id);
       if (mode === 'off') return;
       if (mode === 'repeat') { showRepPopup(el); return; }
       // mode === 'edit'
