@@ -333,17 +333,17 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
     <main>
       <div class="heatmap-grid">
         {allSections.map(t => {
-          // color: 0%=red, 50%=orange, 100%=green
-          const r = t.pct < 50 ? 255 : Math.round(255 - (t.pct - 50) * 5.1);
-          const g = t.pct < 50 ? Math.round(t.pct * 5.1) : 255;
-          const bg = `rgba(${r},${g},80,0.15)`;
-          const fill = `rgb(${r},${g},80)`;
+          // color: grayscale-blue based on percentage
+          const lightness = 90 - (t.pct * 0.5); // 90% (light) to 40% (dark)
+          const bg = `hsl(210, 15%, ${lightness}%)`;
+          const fill = `hsl(210, 40%, ${Math.max(30, 70 - t.pct * 0.4)}%)`;
+          const textColor = t.pct > 60 ? '#1e293b' : '#475569';
           return (
             <div class="hm-card" style={`background:${bg}`} data-goto={t.code}>
               <div class="hm-top">
                 <span class="hm-flag">{t.flag}</span>
                 <span class="hm-name">{t.name}</span>
-                <span class="hm-pct" style={`color:${fill}`}>{t.pct}%</span>
+                <span class="hm-pct" style={`color:${textColor}`}>{t.pct}%</span>
               </div>
               <div class="hm-bar"><div class="hm-fill" id={`hm-${t.code}`} style={`width:${t.pct}%;background:${fill}`}></div></div>
               <span class="hm-count" id={`hmc-${t.code}`}>{t.owned}/{t.total} figuritas</span>
@@ -567,9 +567,10 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
 
     // HEATMAP
     function heatColor(pct) {
-      const r = pct < 50 ? 255 : Math.round(255 - (pct - 50) * 5.1);
-      const g = pct < 50 ? Math.round(pct * 5.1) : 255;
-      return { fill: `rgb(${r},${g},80)`, bg: `rgba(${r},${g},80,0.15)` };
+      const lightness = 90 - (pct * 0.5);
+      const fill = `hsl(210, 40%, ${Math.max(30, 70 - pct * 0.4)}%)`;
+      const bg = `hsl(210, 15%, ${lightness}%)`;
+      return { fill, bg };
     }
 
     // EDIT MODE: off -> edit -> repeat -> off
