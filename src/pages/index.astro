@@ -474,7 +474,7 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
     </div>
     <input type="file" id="scan-input-camera" accept="image/*" capture="environment" style="display:none" />
     <input type="file" id="scan-input-file" accept="image/*" style="display:none" />
-    <img id="scan-preview" class="scan-preview" alt="preview" />
+    <img id="scan-preview" class="scan-preview visible" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' fill='none'%3E%3Crect width='400' height='200' rx='12' fill='%23f1f5f9'/%3E%3Cpath d='M180 80h40v40h-40z' fill='%23e2e8f0'/%3E%3Ccircle cx='190' cy='90' r='6' fill='%23cbd5e0'/%3E%3Cpath d='M170 120l20-20 15 15 25-30 30 35H170z' fill='%23cbd5e0'/%3E%3Ctext x='200' y='155' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%2394a3b8'%3ETu foto aparecerá aquí%3C/text%3E%3C/svg%3E" alt="preview" />
     <button class="scan-btn" id="scan-btn"><iconify-icon icon="mdi:magnify-scan" width="18"></iconify-icon> Reconocer cartas</button>
     <div class="scan-results" id="scan-results"></div>
   </div>
