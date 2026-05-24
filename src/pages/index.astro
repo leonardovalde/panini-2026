@@ -523,8 +523,6 @@ const allSections = [
       document.getElementById('g-bar').style.width = `${(gOwned / totalAll * 100).toFixed(1)}%`;
     }
 
-    document.querySelectorAll('.sticker').forEach(el => el.addEventListener('click', () => toggle(el)));
-
     // REPEATED
     async function changeRepeated(id, delta) {
       const res = await fetch('/api/repeated', {
