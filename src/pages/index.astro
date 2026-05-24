@@ -361,7 +361,61 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
       <div class="list-tab" id="lt-repeated" data-list="repeated">Repetidas</div>
     </div>
     <button class="list-export" id="list-export-btn"><iconify-icon icon="mdi:content-copy" width="14"></iconify-icon> Copiar lista</button>
-    <div class="list-output" id="list-output">{missingList || 'No hay faltantes 🎉'}</div>
+
+    <!-- Missing cards -->
+    <div id="list-view-missing">
+      {sectionsForList.map(sec => {
+        const missing = sec.stickers.filter(s => !ownedSet.has(s.id));
+        if (!missing.length) return null;
+        return (
+          <div class="section collapsed">
+            <div class="section-header" data-toggle-list>
+              <span class="section-flag">{sec.flag}</span>
+              <h2>{sec.name}</h2>
+              <span class="section-count">{missing.length}</span>
+              <span class="chevron">▾</span>
+            </div>
+            <div class="sticker-grid">
+              {missing.map(s => (
+                <div class={`sticker missing`} data-id={s.id} data-section={sec.code} title={`${s.id} - ${s.name}`}>
+                  <span class="sid">{s.id}</span>
+                  <span class="sname">{s.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+
+    <!-- Repeated cards -->
+    <div id="list-view-repeated" style="display:none">
+      {sectionsForList.map(sec => {
+        const reps = sec.stickers.filter(s => (repeatedMap.get(s.id) ?? 0) > 0);
+        if (!reps.length) return null;
+        return (
+          <div class="section collapsed">
+            <div class="section-header" data-toggle-list>
+              <span class="section-flag">{sec.flag}</span>
+              <h2>{sec.name}</h2>
+              <span class="section-count">{reps.length}</span>
+              <span class="chevron">▾</span>
+            </div>
+            <div class="sticker-grid">
+              {reps.map(s => (
+                <div class={`sticker owned`} data-id={s.id} data-section={sec.code} title={`${s.id} - ${s.name}`}>
+                  <span class="sid">{s.id}</span>
+                  <span class="sname">{s.name}</span>
+                  <span class="rbadge">{repeatedMap.get(s.id)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      {repeatedStickers.length === 0 && <p class="rep-empty">No hay repetidas</p>}
+    </div>
+
     <div id="list-data-missing" style="display:none">{missingList || 'No hay faltantes 🎉'}</div>
     <div id="list-data-repeated" style="display:none">{repeatedList || 'No hay repetidas'}</div>
   </div>
@@ -722,16 +776,21 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
       tab.addEventListener('click', () => {
         currentList = tab.dataset.list;
         document.querySelectorAll('.list-tab').forEach(t => t.classList.toggle('active', t.dataset.list === currentList));
-        document.getElementById('list-output').textContent = document.getElementById(`list-data-${currentList}`).textContent;
+        document.getElementById('list-view-missing').style.display = currentList === 'missing' ? '' : 'none';
+        document.getElementById('list-view-repeated').style.display = currentList === 'repeated' ? '' : 'none';
       });
     });
     document.getElementById('list-export-btn').addEventListener('click', () => {
-      const text = document.getElementById('list-output').textContent;
+      const text = document.getElementById(`list-data-${currentList}`).textContent;
       navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById('list-export-btn');
         btn.textContent = '✓ Copiado!';
         setTimeout(() => btn.innerHTML = '<iconify-icon icon="mdi:content-copy" width="14"></iconify-icon> Copiar lista', 1500);
       });
+    });
+    // collapsible in lists
+    document.querySelectorAll('[data-toggle-list]').forEach(header => {
+      header.addEventListener('click', () => header.closest('.section').classList.toggle('collapsed'));
     });
 
     // SCAN
