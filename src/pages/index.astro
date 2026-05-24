@@ -334,10 +334,10 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
       <div class="heatmap-grid">
         {allSections.map(t => {
           // color: grayscale-blue based on percentage
-          const lightness = 90 - (t.pct * 0.5); // 90% (light) to 40% (dark)
+          const lightness = 95 - (t.pct * 0.25); // 95% (very light) to 70% (medium)
           const bg = `hsl(210, 15%, ${lightness}%)`;
-          const fill = `hsl(210, 40%, ${Math.max(30, 70 - t.pct * 0.4)}%)`;
-          const textColor = t.pct > 60 ? '#1e293b' : '#475569';
+          const fill = `hsl(210, 30%, ${Math.max(55, 80 - t.pct * 0.25)}%)`;
+          const textColor = '#475569';
           return (
             <div class="hm-card" style={`background:${bg}`} data-goto={t.code}>
               <div class="hm-top">
@@ -567,8 +567,8 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
 
     // HEATMAP
     function heatColor(pct) {
-      const lightness = 90 - (pct * 0.5);
-      const fill = `hsl(210, 40%, ${Math.max(30, 70 - pct * 0.4)}%)`;
+      const lightness = 95 - (pct * 0.25);
+      const fill = `hsl(210, 30%, ${Math.max(55, 80 - pct * 0.25)}%)`;
       const bg = `hsl(210, 15%, ${lightness}%)`;
       return { fill, bg };
     }
