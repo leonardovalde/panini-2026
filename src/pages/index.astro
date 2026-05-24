@@ -1,6 +1,6 @@
 ---
 import { getPool, initDB } from '../lib/db';
-import { INTRO, FIFA_MUSEUM, TEAMS, COCA_COLA } from '../lib/stickers';
+import { INTRO, FIFA_MUSEUM, TEAMS, COCA_COLA, ISO_FLAGS } from '../lib/stickers';
 
 await initDB();
 const { rows } = await getPool().query('SELECT id, owned, repeated FROM stickers');
@@ -27,6 +27,12 @@ const repeatedBySection = repeatedStickers.reduce((acc, s) => {
 function repBadge(id: string) {
   const count = repeatedMap.get(id);
   return count ? count : 0;
+}
+
+function flagIcon(code: string) {
+  const iso = ISO_FLAGS[code];
+  if (iso) return `circle-flags:${iso}`;
+  return '';
 }
 const allSections = [
   { code: 'intro', name: 'Introducción', flag: '🌍', stickers: INTRO },
@@ -272,8 +278,8 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
         return (
           <div class="section collapsed" id={t.code}>
             <div class="section-header" data-toggle={t.code}>
-              <span class="section-flag">{t.flag}</span>
-              <h2>{t.name}</h2>
+              <span class="section-flag"><iconify-icon icon={flagIcon(t.code)} width="20"></iconify-icon></span>
+              <h2>{t.name} ({t.code})</h2>
               <span class={`section-count ${teamOwned === t.stickers.length ? 'complete' : ''}`} id={`cnt-${t.code}`}>{teamOwned}/{t.stickers.length}</span>
               <span class="chevron">▾</span>
             </div>
@@ -342,8 +348,8 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
           return (
             <div class="hm-card" style={`background:${bg}`} data-goto={t.code}>
               <div class="hm-top">
-                <span class="hm-flag">{t.flag}</span>
-                <span class="hm-name">{t.name}</span>
+                <span class="hm-flag"><iconify-icon icon={ISO_FLAGS[t.code] ? `circle-flags:${ISO_FLAGS[t.code]}` : 'mdi:flag'} width="20"></iconify-icon></span>
+                <span class="hm-name">{t.name} ({t.code})</span>
                 <span class="hm-pct" style={`color:${textColor}`}>{t.pct}%</span>
               </div>
               <div class="hm-bar"><div class="hm-fill" id={`hm-${t.code}`} style={`width:${t.pct}%;background:${fill}`}></div></div>
@@ -371,8 +377,8 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
         return (
           <div class="section">
             <div class="section-header" data-toggle-list>
-              <span class="section-flag">{sec.flag}</span>
-              <h2>{sec.name}</h2>
+              <span class="section-flag"><iconify-icon icon={ISO_FLAGS[sec.code] ? `circle-flags:${ISO_FLAGS[sec.code]}` : "mdi:flag"} width="20"></iconify-icon></span>
+              <h2>{sec.name} ({sec.code})</h2>
               <span class="section-count">{missing.length}</span>
               <span class="chevron">▾</span>
             </div>
@@ -397,8 +403,8 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
         return (
           <div class="section">
             <div class="section-header" data-toggle-list>
-              <span class="section-flag">{sec.flag}</span>
-              <h2>{sec.name}</h2>
+              <span class="section-flag"><iconify-icon icon={ISO_FLAGS[sec.code] ? `circle-flags:${ISO_FLAGS[sec.code]}` : "mdi:flag"} width="20"></iconify-icon></span>
+              <h2>{sec.name} ({sec.code})</h2>
               <span class="section-count">{reps.length}</span>
               <span class="chevron">▾</span>
             </div>
