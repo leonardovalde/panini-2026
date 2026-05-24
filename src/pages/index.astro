@@ -187,11 +187,12 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
     #view-scan.visible { display: block; }
     .scan-drop { border: 2px dashed #334155; border-radius: 12px; padding: 2rem 1rem; text-align: center; cursor: pointer; color: #94a3b8; font-size: 0.85rem; transition: border-color 0.15s; }
     .scan-drop:active { border-color: #38bdf8; }
-    .scan-preview { width: 100%; border-radius: 10px; margin-top: 0.75rem; display: none; min-height: 40px; }
+    .scan-preview { width: 100%; border-radius: 12px; margin-top: 1rem; display: none; min-height: 40px; border: 1px solid #e2e8f0; }
     .scan-preview.visible { display: block; }
-    .scan-preview:not([src]), .scan-preview[src=""] { display: flex; align-items: center; justify-content: center; background: #ffffff; color: #94a3b8; font-size: 0.8rem; padding: 1rem; border-radius: 10px; }
-    .scan-btn { width: 100%; margin-top: 0.75rem; padding: 0.7rem; background: #38bdf8; color: #0f172a; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: none; }
-    .scan-btn.visible { display: block; }
+    .scan-preview:not([src]), .scan-preview[src=""] { display: flex; align-items: center; justify-content: center; background: #f8fafc; color: #94a3b8; font-size: 0.8rem; padding: 1rem; border-radius: 12px; }
+    .scan-btn { width: 100%; margin-top: 0.75rem; padding: 0.75rem; background: #1e293b; color: #fff; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: none; }
+    .scan-btn.visible { display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .scan-btn:active { background: #334155; }
     .scan-results { margin-top: 1rem; }
     .scan-group { margin-bottom: 0.75rem; }
     .scan-group h3 { font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; }
@@ -462,9 +463,14 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
 
   <!-- SCAN VIEW -->
   <div id="view-scan">
-    <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-      <button style="flex:1;padding:0.65rem;background:#ffffff;color:#1e293b;border:1px solid #334155;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-camera"><iconify-icon icon="mdi:camera" width="16"></iconify-icon> Cámara</button>
-      <button style="flex:1;padding:0.65rem;background:#ffffff;color:#1e293b;border:1px solid #334155;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-file">🖼 Archivo</button>
+    <div style="text-align:center;padding:1.5rem 0 0.5rem">
+      <iconify-icon icon="mdi:camera-document-outline" width="48" style="color:#94a3b8"></iconify-icon>
+      <p style="font-size:0.85rem;color:#475569;margin-top:0.5rem;font-weight:600">Escanear cartas</p>
+      <p style="font-size:0.72rem;color:#94a3b8;margin-top:0.2rem">Toma una foto del reverso de tus cartas</p>
+    </div>
+    <div style="display:flex;gap:0.5rem;margin-top:1rem">
+      <button style="flex:1;padding:0.7rem;background:#fff;color:#1e293b;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem" id="btn-camera"><iconify-icon icon="mdi:camera" width="18"></iconify-icon> Cámara</button>
+      <button style="flex:1;padding:0.7rem;background:#fff;color:#1e293b;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem" id="btn-file"><iconify-icon icon="mdi:image-outline" width="18"></iconify-icon> Archivo</button>
     </div>
     <input type="file" id="scan-input-camera" accept="image/*" capture="environment" style="display:none" />
     <input type="file" id="scan-input-file" accept="image/*" style="display:none" />
