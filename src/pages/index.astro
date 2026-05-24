@@ -23,6 +23,11 @@ const repeatedBySection = repeatedStickers.reduce((acc, s) => {
   acc[s.section].items.push(s);
   return acc;
 }, {} as Record<string, { flag: string; items: typeof allWithSection }>);
+
+function repBadge(id: string) {
+  const count = repeatedMap.get(id);
+  return count ? count : 0;
+}
 const allSections = [
   { code: 'intro', name: 'Introducción', flag: '🌍', stickers: INTRO },
   ...TEAMS.map(t => ({ code: t.code, name: t.name, flag: t.flag, stickers: t.stickers })),
@@ -79,10 +84,16 @@ const allSections = [
     .sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
     @media (min-width: 400px) { .sticker-grid { grid-template-columns: repeat(6, 1fr); } }
     @media (min-width: 600px) { .sticker-grid { grid-template-columns: repeat(8, 1fr); } }
-    .sticker { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 7px; cursor: pointer; border: 1.5px solid transparent; transition: transform 0.08s; user-select: none; padding: 3px; touch-action: manipulation; }
+    .sticker { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 7px; cursor: pointer; border: 1.5px solid transparent; transition: transform 0.08s; user-select: none; padding: 3px; touch-action: manipulation; position: relative; }
     .sticker:active { transform: scale(0.91); }
     body.edit-mode .sticker { cursor: pointer; }
     body:not(.edit-mode) .sticker { cursor: default; }
+    .rbadge { position: absolute; top: 2px; right: 2px; background: #38bdf8; color: #fff; font-size: 0.45rem; font-weight: 800; min-width: 14px; height: 14px; border-radius: 7px; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
+    .rep-popup { position: fixed; z-index: 210; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 0.6rem; display: flex; align-items: center; gap: 0.75rem; }
+    .rep-popup button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .rep-popup button:active { background: #e2e8f0; }
+    .rep-popup .rp-count { font-size: 1rem; font-weight: 800; min-width: 24px; text-align: center; color: #1e293b; }
+    .rep-popup .rp-label { font-size: 0.65rem; color: #64748b; }
     .sticker .sid { font-size: 0.56rem; font-weight: 700; line-height: 1; }
     .sticker .sname { font-size: 0.4rem; line-height: 1.15; text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 1px; }
     .sticker.owned   { background: #166534; border-color: #4ade80; color: #bbf7d0; }
@@ -231,6 +242,7 @@ const allSections = [
                   class={`sticker ${s.foil ? 'foil' : s.name === 'Team Photo' ? 'photo' : ''} ${ownedSet.has(s.id) ? 'owned' : 'missing'}`}
                   data-id={s.id} data-section={t.code} title={`${s.id} - ${s.name}`}
                 >
+                  {repBadge(s.id) > 0 && <span class="rbadge" id={`rbadge-${s.id}`}>{repBadge(s.id)}</span>}
                   <span class="sid">{s.id}</span>
                   <span class="sname">{s.name}</span>
                 </div>
@@ -516,9 +528,15 @@ const allSections = [
         body: JSON.stringify({ id, delta }),
       });
       const { repeated } = await res.json();
-      // update count badge on sticker
-      const badge = document.getElementById(`rbadge-${id}`);
-      if (badge) { badge.textContent = repeated > 0 ? `+${repeated}` : ''; badge.style.display = repeated > 0 ? '' : 'none'; }
+      // update badge on sticker
+      const sticker = document.querySelector(`.sticker[data-id="${id}"]`);
+      if (sticker) {
+        let badge = sticker.querySelector('.rbadge');
+        if (repeated > 0) {
+          if (!badge) { badge = document.createElement('span'); badge.className = 'rbadge'; badge.id = `rbadge-${id}`; sticker.appendChild(badge); }
+          badge.textContent = repeated;
+        } else if (badge) { badge.remove(); }
+      }
       // update repeated view row
       const row = document.querySelector(`[data-rep-id="${id}"]`);
       const cnt = document.getElementById(`rc-${id}`);
@@ -533,11 +551,59 @@ const allSections = [
       }
     }
 
-    // + button on each sticker (long press or double tap)
+    // Long press popup for repeated count
+    let repPopup = null;
+    let repPopupId = null;
+
+    function showRepPopup(el) {
+      closeRepPopup();
+      const id = el.dataset.id;
+      repPopupId = id;
+      const name = el.querySelector('.sname')?.textContent?.trim() || id;
+      const badge = el.querySelector('.rbadge');
+      const count = badge ? parseInt(badge.textContent) || 0 : 0;
+
+      const rect = el.getBoundingClientRect();
+      repPopup = document.createElement('div');
+      repPopup.className = 'rep-popup';
+      repPopup.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <span class="rp-label">${id}</span>
+          <span class="rp-label">${name}</span>
+        </div>
+        <button id="rp-minus">−</button>
+        <span class="rp-count" id="rp-val">${count}</span>
+        <button id="rp-plus">+</button>
+      `;
+      repPopup.style.top = `${Math.max(10, rect.top - 60)}px`;
+      repPopup.style.left = `${Math.max(10, Math.min(rect.left, window.innerWidth - 220))}px`;
+      document.body.appendChild(repPopup);
+
+      repPopup.querySelector('#rp-plus').addEventListener('click', async () => {
+        await changeRepeated(id, 1);
+        const val = repPopup.querySelector('#rp-val');
+        val.textContent = parseInt(val.textContent) + 1;
+      });
+      repPopup.querySelector('#rp-minus').addEventListener('click', async () => {
+        const val = repPopup.querySelector('#rp-val');
+        const cur = parseInt(val.textContent);
+        if (cur <= 0) return;
+        await changeRepeated(id, -1);
+        val.textContent = cur - 1;
+      });
+    }
+
+    function closeRepPopup() {
+      if (repPopup) { repPopup.remove(); repPopup = null; repPopupId = null; }
+    }
+    document.addEventListener('click', e => {
+      if (repPopup && !repPopup.contains(e.target) && !e.target.closest('.sticker')) closeRepPopup();
+    });
+
     document.querySelectorAll('.sticker').forEach(el => {
       let timer;
-      el.addEventListener('contextmenu', e => { e.preventDefault(); changeRepeated(el.dataset.id, 1); });
-      el.addEventListener('touchstart', () => { timer = setTimeout(() => changeRepeated(el.dataset.id, 1), 600); });
+      el.addEventListener('contextmenu', e => { e.preventDefault(); showRepPopup(el); });
+      el.addEventListener('touchstart', () => { timer = setTimeout(() => showRepPopup(el), 600); });
       el.addEventListener('touchend', () => clearTimeout(timer));
       el.addEventListener('touchmove', () => clearTimeout(timer));
     });
