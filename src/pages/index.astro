@@ -573,6 +573,14 @@ const allSections = [
       const count = badge ? parseInt(badge.textContent) || 0 : 0;
 
       const rect = el.getBoundingClientRect();
+
+      // backdrop
+      const backdrop = document.createElement('div');
+      backdrop.id = 'rep-backdrop';
+      backdrop.style.cssText = 'position:fixed;inset:0;z-index:209;';
+      backdrop.addEventListener('click', closeRepPopup);
+      document.body.appendChild(backdrop);
+
       repPopup = document.createElement('div');
       repPopup.className = 'rep-popup';
       repPopup.innerHTML = `
@@ -604,10 +612,9 @@ const allSections = [
 
     function closeRepPopup() {
       if (repPopup) { repPopup.remove(); repPopup = null; repPopupId = null; }
+      const backdrop = document.getElementById('rep-backdrop');
+      if (backdrop) backdrop.remove();
     }
-    document.addEventListener('click', e => {
-      if (repPopup && !repPopup.contains(e.target) && !e.target.closest('.sticker')) closeRepPopup();
-    });
 
     document.querySelectorAll('.sticker').forEach(el => el.addEventListener('click', () => toggle(el)));
 
