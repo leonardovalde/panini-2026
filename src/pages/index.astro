@@ -40,35 +40,36 @@ const allSections = [
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Álbum Leo & Gabi 2026</title>
+  <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100dvh; -webkit-tap-highlight-color: transparent; }
-    .app { max-width: 480px; margin: 0 auto; background: #0f172a; }
-    header { background: #0f172a; padding: 0.7rem 1rem 0.5rem; text-align: center; border-bottom: 1px solid #1e293b; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
-    header h1 { font-size: 1rem; font-weight: 800; color: #f1f5f9; }
+    body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #1e293b; min-height: 100dvh; -webkit-tap-highlight-color: transparent; }
+    .app { max-width: 480px; margin: 0 auto; background: #f1f5f9; }
+    header { background: #f1f5f9; padding: 0.7rem 1rem 0.5rem; text-align: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    header h1 { font-size: 1rem; font-weight: 800; color: #1e293b; }
     header p { font-size: 0.68rem; color: #475569; margin-top: 0.1rem; }
     .logout { position: absolute; top: 0.6rem; right: 0.75rem; font-size: 0.68rem; color: #475569; text-decoration: none; }
-    .global-stats { display: flex; gap: 1rem; justify-content: center; margin-top: 0.3rem; font-size: 0.72rem; color: #64748b; }
+    .global-stats { display: flex; gap: 1rem; justify-content: center; margin-top: 0.3rem; font-size: 0.72rem; color: #94a3b8; }
     .global-stats strong { color: #94a3b8; }
-    .progress-bar { width: 100%; margin: 0.35rem auto 0; height: 4px; background: #1e293b; border-radius: 2px; overflow: hidden; }
+    .progress-bar { width: 100%; margin: 0.35rem auto 0; height: 4px; background: #ffffff; border-radius: 2px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 2px; transition: width 0.3s; }
     .hamburger { position: absolute; top: 0.7rem; left: 0.75rem; background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; padding: 0.2rem; }
     .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; }
     .drawer-overlay.open { display: block; }
-    .drawer { position: fixed; top: 0; left: 0; height: 100%; width: 220px; background: #1e293b; z-index: 151; transform: translateX(-100%); transition: transform 0.25s; padding: 1.5rem 0; }
+    .drawer { position: fixed; top: 0; left: 0; height: 100%; width: 220px; background: #ffffff; z-index: 151; transform: translateX(-100%); transition: transform 0.25s; padding: 1.5rem 0; }
     .drawer.open { transform: translateX(0); }
     .drawer-title { font-size: 0.7rem; color: #475569; padding: 0 1.25rem 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; }
     .drawer-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.25rem; font-size: 0.9rem; color: #94a3b8; cursor: pointer; transition: background 0.1s; }
-    .drawer-item:active, .drawer-item.active { background: #0f172a; color: #f1f5f9; }
+    .drawer-item:active, .drawer-item.active { background: #f1f5f9; color: #1e293b; }
     .drawer-item.active { border-left: 3px solid #38bdf8; padding-left: calc(1.25rem - 3px); }
-    nav { display: flex; overflow-x: auto; gap: 0.4rem; padding: 0.45rem 0.75rem; background: #0f172a; border-bottom: 1px solid #1e293b; position: sticky; top: 82px; z-index: 98; scrollbar-width: none; }
+    nav { display: flex; overflow-x: auto; gap: 0.4rem; padding: 0.45rem 0.75rem; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; position: sticky; top: 82px; z-index: 98; scrollbar-width: none; }
     nav::-webkit-scrollbar { display: none; }
-    nav a { flex-shrink: 0; font-size: 0.68rem; padding: 0.25rem 0.55rem; border-radius: 20px; background: #1e293b; color: #64748b; text-decoration: none; white-space: nowrap; border: 1px solid #334155; }
-    nav a:active { background: #334155; color: #e2e8f0; }
+    nav a { flex-shrink: 0; font-size: 0.68rem; padding: 0.25rem 0.55rem; border-radius: 20px; background: #ffffff; color: #94a3b8; text-decoration: none; white-space: nowrap; border: 1px solid #cbd5e0; }
+    nav a:active { background: #334155; color: #1e293b; }
     main { padding: 0.75rem; }
     .section { margin-bottom: 1.5rem; scroll-margin-top: 120px; }
-    .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid #1e293b; cursor: pointer; }
-    .section-header h2 { font-size: 0.88rem; font-weight: 700; color: #e2e8f0; }
+    .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid #e2e8f0; cursor: pointer; }
+    .section-header h2 { font-size: 0.88rem; font-weight: 700; color: #1e293b; }
     .section-flag { font-size: 1.2rem; line-height: 1; }
     .section-count { margin-left: auto; font-size: 0.68rem; color: #475569; }
     .section-count.complete { color: #4ade80; font-weight: 700; }
@@ -80,38 +81,41 @@ const allSections = [
     @media (min-width: 600px) { .sticker-grid { grid-template-columns: repeat(8, 1fr); } }
     .sticker { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 7px; cursor: pointer; border: 1.5px solid transparent; transition: transform 0.08s; user-select: none; padding: 3px; touch-action: manipulation; }
     .sticker:active { transform: scale(0.91); }
+    body.edit-mode .sticker { cursor: pointer; }
+    body:not(.edit-mode) .sticker { cursor: default; }
     .sticker .sid { font-size: 0.56rem; font-weight: 700; line-height: 1; }
     .sticker .sname { font-size: 0.4rem; line-height: 1.15; text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 1px; }
     .sticker.owned   { background: #166534; border-color: #4ade80; color: #bbf7d0; }
-    .sticker.missing { background: #1e293b; border-color: #334155; color: #475569; }
+    .sticker.missing { background: #ffffff; border-color: #cbd5e0; color: #475569; }
     .sticker.foil.owned   { background: linear-gradient(135deg, #854d0e, #ca8a04); border-color: #fbbf24; color: #fef9c3; }
-    .sticker.foil.missing { background: #1c1917; border-color: #44403c; color: #57534e; }
+    .sticker.foil.missing { background: #fffbeb; border-color: #fde68a; color: #b45309; }
     .sticker.photo.owned   { background: #1e3a5f; border-color: #38bdf8; color: #bae6fd; }
-    .sticker.photo.missing { background: #0f1f33; border-color: #1e3a5f; color: #334155; }
+    .sticker.photo.missing { background: #eff6ff; border-color: #bfdbfe; color: #93c5fd; }
     #view-heatmap { display: none; }
     #view-heatmap.visible { display: block; }
     .hidden { display: none !important; }
     .heatmap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    @media (min-width: 500px) { .heatmap-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (min-width: 700px) { .heatmap-grid { grid-template-columns: repeat(4, 1fr); } }
-    .hm-card { border-radius: 10px; padding: 0.6rem 0.5rem 0.5rem; display: flex; flex-direction: column; gap: 0.3rem; border: 1px solid rgba(255,255,255,0.06); cursor: pointer; }
+    .hm-card { border-radius: 10px; padding: 0.6rem 0.5rem 0.5rem; display: flex; flex-direction: column; gap: 0.3rem; border: 1px solid #e2e8f0; cursor: pointer; }
     .hm-top { display: flex; align-items: center; gap: 0.4rem; }
     .hm-flag { font-size: 1.3rem; line-height: 1; }
-    .hm-name { font-size: 0.7rem; font-weight: 700; color: #e2e8f0; line-height: 1.2; }
+    .hm-name { font-size: 0.7rem; font-weight: 700; color: #1e293b; line-height: 1.2; }
     .hm-pct { margin-left: auto; font-size: 0.75rem; font-weight: 800; }
-    .hm-bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
+    .hm-bar { height: 5px; border-radius: 3px; background: #e2e8f0; overflow: hidden; }
     .hm-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
-    .hm-count { font-size: 0.6rem; color: #64748b; }
-    .fab { position: fixed; bottom: 1.25rem; right: max(1.25rem, calc(50vw - 240px + 1.25rem)); z-index: 200; width: 52px; height: 52px; border-radius: 50%; background: #38bdf8; color: #0f172a; border: none; font-size: 1.3rem; cursor: pointer; box-shadow: 0 4px 14px rgba(56,189,248,0.4); display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
-    .search-overlay { display: none; position: fixed; inset: 0; z-index: 199; background: rgba(0,0,0,0.6); align-items: flex-start; justify-content: center; padding-top: 5rem; }
+    .hm-count { font-size: 0.6rem; color: #94a3b8; }
+    .fab { position: fixed; right: max(1.25rem, calc(50vw - 240px + 1.25rem)); z-index: 200; width: 48px; height: 48px; border-radius: 50%; border: none; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
+    .fab-search { bottom: 1.25rem; background: #38bdf8; color: #0f172a; box-shadow: 0 4px 14px rgba(56,189,248,0.4); }
+    .fab-edit { bottom: 5rem; background: #ffffff; color: #94a3b8; border: 1.5px solid #cbd5e0 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .fab-edit.active { background: #166534; color: #4ade80; border-color: #4ade80 !important; }
+    .search-overlay { display: none; position: fixed; inset: 0; z-index: 199; background: rgba(0,0,0,0.4); align-items: flex-start; justify-content: center; padding-top: 5rem; }
     .search-overlay.open { display: flex; }
-    .search-box { background: #1e293b; border-radius: 14px; padding: 1rem; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-    .search-box input { width: 100%; border: 1.5px solid #334155; border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 1rem; outline: none; color: #e2e8f0; background: #0f172a; }
+    .search-box { background: #ffffff; border-radius: 14px; padding: 1rem; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+    .search-box input { width: 100%; border: 1.5px solid #cbd5e0; border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 1rem; outline: none; color: #1e293b; background: #f1f5f9; }
     .search-box input:focus { border-color: #38bdf8; }
     .search-results { margin-top: 0.6rem; max-height: 50vh; overflow-y: auto; }
-    .search-result { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: #e2e8f0; margin-bottom: 3px; }
+    .search-result { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: #1e293b; margin-bottom: 3px; }
     .search-result.owned   { background: #166534; color: #bbf7d0; }
-    .search-result.missing { background: #1e293b; color: #94a3b8; }
+    .search-result.missing { background: #ffffff; color: #94a3b8; }
     .search-result:active { filter: brightness(1.2); }
     .search-result .sr-id { font-weight: 700; min-width: 52px; font-size: 0.75rem; }
     .search-empty { font-size: 0.8rem; color: #475569; text-align: center; padding: 1rem; }
@@ -119,29 +123,29 @@ const allSections = [
     /* repeated view */
     #view-repeated { display: none; padding: 0.75rem; }
     #view-repeated.visible { display: block; }
-    .rep-search { width: 100%; border: 1.5px solid #334155; border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 0.9rem; background: #1e293b; color: #e2e8f0; outline: none; margin-bottom: 0.75rem; }
+    .rep-search { width: 100%; border: 1.5px solid #cbd5e0; border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 0.9rem; background: #ffffff; color: #1e293b; outline: none; margin-bottom: 0.75rem; }
     .rep-search:focus { border-color: #38bdf8; }
     .rep-empty { text-align: center; color: #475569; font-size: 0.85rem; padding: 2rem 1rem; }
     .rep-sticker {
       display: flex; align-items: center; gap: 0.6rem;
       padding: 0.5rem 0.6rem; border-radius: 8px;
-      background: #1e293b; border: 1px solid #334155;
+      background: #ffffff; border: 1px solid #cbd5e0;
       margin-bottom: 4px;
     }
     .rep-sticker .rs-id { font-size: 0.7rem; font-weight: 800; color: #38bdf8; min-width: 52px; }
-    .rep-sticker .rs-name { font-size: 0.82rem; color: #e2e8f0; flex: 1; }
+    .rep-sticker .rs-name { font-size: 0.82rem; color: #1e293b; flex: 1; }
     .rep-sticker .rs-count { font-size: 0.75rem; font-weight: 700; color: #4ade80; min-width: 24px; text-align: center; }
     .rep-sticker .rs-del { background: #3b0f0f; border: 1px solid #f87171; color: #f87171; border-radius: 6px; padding: 0.2rem 0.5rem; font-size: 0.75rem; cursor: pointer; }
-    .rep-add-btn { width: 100%; padding: 0.65rem; background: #1e293b; color: #38bdf8; border: 1.5px dashed #334155; border-radius: 10px; font-size: 0.85rem; cursor: pointer; margin-bottom: 0.75rem; }
+    .rep-add-btn { width: 100%; padding: 0.65rem; background: #ffffff; color: #38bdf8; border: 1.5px dashed #334155; border-radius: 10px; font-size: 0.85rem; cursor: pointer; margin-bottom: 0.75rem; }
 
     /* scan view */
     #view-scan { display: none; padding: 1rem; }
     #view-scan.visible { display: block; }
-    .scan-drop { border: 2px dashed #334155; border-radius: 12px; padding: 2rem 1rem; text-align: center; cursor: pointer; color: #64748b; font-size: 0.85rem; transition: border-color 0.15s; }
+    .scan-drop { border: 2px dashed #334155; border-radius: 12px; padding: 2rem 1rem; text-align: center; cursor: pointer; color: #94a3b8; font-size: 0.85rem; transition: border-color 0.15s; }
     .scan-drop:active { border-color: #38bdf8; }
     .scan-preview { width: 100%; border-radius: 10px; margin-top: 0.75rem; display: none; min-height: 40px; }
     .scan-preview.visible { display: block; }
-    .scan-preview:not([src]), .scan-preview[src=""] { display: flex; align-items: center; justify-content: center; background: #1e293b; color: #64748b; font-size: 0.8rem; padding: 1rem; border-radius: 10px; }
+    .scan-preview:not([src]), .scan-preview[src=""] { display: flex; align-items: center; justify-content: center; background: #ffffff; color: #94a3b8; font-size: 0.8rem; padding: 1rem; border-radius: 10px; }
     .scan-btn { width: 100%; margin-top: 0.75rem; padding: 0.7rem; background: #38bdf8; color: #0f172a; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: none; }
     .scan-btn.visible { display: block; }
     .scan-results { margin-top: 1rem; }
@@ -156,10 +160,10 @@ const allSections = [
     .scan-card.missing { background: #3b0f0f; border-color: #f87171; color: #fecaca; }
     .scan-card .sc-code { font-size: 0.56rem; font-weight: 700; line-height: 1; }
     .scan-card .sc-name { font-size: 0.4rem; line-height: 1.15; text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 1px; }
-    .scan-loading { text-align: center; color: #64748b; font-size: 0.85rem; padding: 1rem; }
+    .scan-loading { text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 1rem; }
     .search-result { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin-bottom: 3px; }
     .search-result.owned   { background: #166534; color: #bbf7d0; }
-    .search-result.missing { background: #1e293b; color: #94a3b8; }
+    .search-result.missing { background: #ffffff; color: #94a3b8; }
     .search-result:active { filter: brightness(1.2); }
     .search-result .sr-id { font-weight: 700; min-width: 52px; font-size: 0.75rem; }
   </style>
@@ -168,8 +172,8 @@ const allSections = [
   <div class="app">
   <header>
 
-    <button class="hamburger" id="hamburger">☰</button>
-    <h1>✨ Álbum de Leo & Gabi ✨</h1>
+    <button class="hamburger" id="hamburger"><iconify-icon icon="mdi:menu" width="20"></iconify-icon></button>
+    <h1>Álbum de Leo & Gabi</h1>
     <p>⚽ Panini FIFA World Cup 2026™</p>
     <div class="global-stats">
       <span>Tengo: <strong id="g-owned">{totalOwned}</strong></span>
@@ -184,25 +188,19 @@ const allSections = [
   <div class="drawer-overlay" id="drawer-overlay"></div>
   <div class="drawer" id="drawer">
     <div class="drawer-title">Menú</div>
-    <div class="drawer-item active" data-tab="stickers">🗂 Stickers</div>
-    <div class="drawer-item" data-tab="heatmap">🌡 Por país</div>
-    <div class="drawer-item" data-tab="repeated">🔄 Repetidas</div>
-    <div class="drawer-item" data-tab="scan">📷 Escanear</div>
+    <div class="drawer-item active" data-tab="stickers"><iconify-icon icon="mdi:sticker-outline" width="18"></iconify-icon> Stickers</div>
+    <div class="drawer-item" data-tab="heatmap"><iconify-icon icon="mdi:chart-bar" width="18"></iconify-icon> Por país</div>
+    <!--<div class="drawer-item" data-tab="repeated">🔄 Repetidas</div>-->
+    <div class="drawer-item" data-tab="scan"><iconify-icon icon="mdi:camera-outline" width="18"></iconify-icon> Escanear</div>
   </div>
 
-  <nav id="team-nav">
-    <a href="#intro">Intro</a>
-    {TEAMS.map(t => <a href={`#${t.code}`}>{t.flag} {t.name}</a>)}
-    <a href="#museum">Museum</a>
-    <a href="#cocacola">🥤 Coca-Cola</a>
-  </nav>
 
   <!-- STICKERS VIEW -->
   <div id="view-stickers">
     <main>
       <div class="section collapsed" id="intro">
         <div class="section-header" data-toggle="intro">
-          <span class="section-flag">🌍</span>
+          <span class="section-flag"><iconify-icon icon="mdi:earth" width="20"></iconify-icon></span>
           <h2>Introducción</h2>
           <span class="section-count" id="cnt-intro">{INTRO.filter(s => ownedSet.has(s.id)).length}/{INTRO.length}</span>
           <span class="chevron">▾</span>
@@ -244,7 +242,7 @@ const allSections = [
 
       <div class="section collapsed" id="museum">
         <div class="section-header" data-toggle="museum">
-          <span class="section-flag">🏆</span>
+          <span class="section-flag"><iconify-icon icon="mdi:trophy" width="20"></iconify-icon></span>
           <h2>FIFA Museum</h2>
           <span class="section-count" id="cnt-museum">{FIFA_MUSEUM.filter(s => ownedSet.has(s.id)).length}/{FIFA_MUSEUM.length}</span>
           <span class="chevron">▾</span>
@@ -261,7 +259,7 @@ const allSections = [
 
       <div class="section collapsed" id="cocacola">
         <div class="section-header" data-toggle="cocacola">
-          <span class="section-flag">🥤</span>
+          <span class="section-flag"><iconify-icon icon="mdi:bottle-soda-classic" width="20"></iconify-icon></span>
           <h2>Coca-Cola</h2>
           <span class="section-count" id="cnt-cocacola">{COCA_COLA.filter(s => ownedSet.has(s.id)).length}/{COCA_COLA.length}</span>
           <span class="chevron">▾</span>
@@ -308,14 +306,14 @@ const allSections = [
   <div id="view-repeated">
     <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
       <input class="rep-search" id="rep-search" type="text" placeholder="Buscar en repetidas..." autocomplete="off" style="flex:1;margin:0" />
-      <button id="rep-add-open" style="padding:0.5rem 0.75rem;background:#1e293b;color:#38bdf8;border:1.5px solid #334155;border-radius:8px;font-size:0.85rem;cursor:pointer;white-space:nowrap">+ Agregar</button>
+      <button id="rep-add-open" style="padding:0.5rem 0.75rem;background:#ffffff;color:#38bdf8;border:1.5px solid #334155;border-radius:8px;font-size:0.85rem;cursor:pointer;white-space:nowrap">+ Agregar</button>
     </div>
 
     <!-- add modal -->
     <div id="rep-add-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:flex-start;justify-content:center;padding-top:4rem">
-      <div style="background:#1e293b;border-radius:14px;padding:1rem;width:90%;max-width:380px">
+      <div style="background:#ffffff;border-radius:14px;padding:1rem;width:90%;max-width:380px">
         <input id="rep-add-search" type="text" placeholder="Buscar sticker..." autocomplete="off"
-          style="width:100%;border:1.5px solid #334155;border-radius:8px;padding:0.6rem 0.75rem;font-size:1rem;background:#0f172a;color:#e2e8f0;outline:none;margin-bottom:0.5rem" />
+          style="width:100%;border:1.5px solid #334155;border-radius:8px;padding:0.6rem 0.75rem;font-size:1rem;background:#f1f5f9;color:#1e293b;outline:none;margin-bottom:0.5rem" />
         <div id="rep-add-results" style="max-height:50vh;overflow-y:auto"></div>
       </div>
     </div>
@@ -347,18 +345,19 @@ const allSections = [
   <!-- SCAN VIEW -->
   <div id="view-scan">
     <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-      <button style="flex:1;padding:0.65rem;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-camera">📷 Cámara</button>
-      <button style="flex:1;padding:0.65rem;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-file">🖼 Archivo</button>
+      <button style="flex:1;padding:0.65rem;background:#ffffff;color:#1e293b;border:1px solid #334155;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-camera"><iconify-icon icon="mdi:camera" width="16"></iconify-icon> Cámara</button>
+      <button style="flex:1;padding:0.65rem;background:#ffffff;color:#1e293b;border:1px solid #334155;border-radius:10px;font-size:0.85rem;cursor:pointer" id="btn-file">🖼 Archivo</button>
     </div>
     <input type="file" id="scan-input-camera" accept="image/*" capture="environment" style="display:none" />
     <input type="file" id="scan-input-file" accept="image/*" style="display:none" />
     <img id="scan-preview" class="scan-preview" alt="preview" />
-    <button class="scan-btn" id="scan-btn">🔍 Reconocer cartas</button>
+    <button class="scan-btn" id="scan-btn"><iconify-icon icon="mdi:magnify-scan" width="18"></iconify-icon> Reconocer cartas</button>
     <div class="scan-results" id="scan-results"></div>
   </div>
 
-  <!-- FAB búsqueda -->
-  <button class="fab" id="fab-search">🔍</button>
+  <!-- FABs -->
+  <button class="fab fab-edit" id="fab-edit"><iconify-icon icon="mdi:pencil-outline" width="22"></iconify-icon></button>
+  <button class="fab fab-search" id="fab-search"><iconify-icon icon="mdi:magnify" width="22"></iconify-icon></button>
   <div class="search-overlay" id="search-overlay">
     <div class="search-box">
       <input type="text" id="search-input" placeholder="Buscar jugador o ID..." autocomplete="off" />
@@ -387,7 +386,6 @@ const allSections = [
     // TABS
     function switchTab(tab) {
       document.getElementById('view-stickers').classList.toggle('hidden', tab !== 'stickers');
-      document.getElementById('team-nav').classList.toggle('hidden', tab !== 'stickers');
       document.getElementById('view-heatmap').classList.toggle('hidden', tab !== 'heatmap');
       document.getElementById('view-heatmap').classList.toggle('visible', tab === 'heatmap');
       document.getElementById('view-repeated').classList.toggle('visible', tab === 'repeated');
@@ -455,11 +453,29 @@ const allSections = [
       return { fill: `rgb(${r},${g},80)`, bg: `rgba(${r},${g},80,0.15)` };
     }
 
+    // EDIT MODE
+    let editMode = false;
+    const fabEdit = document.getElementById('fab-edit');
+    fabEdit.addEventListener('click', () => {
+      editMode = !editMode;
+      fabEdit.classList.toggle('active', editMode);
+      document.body.classList.toggle('edit-mode', editMode);
+    });
+
     // TOGGLE STICKER
     async function toggle(el) {
+      if (!editMode) return;
       const id = el.dataset.id;
       const section = el.dataset.section;
-      const newOwned = !el.classList.contains('owned');
+      const isOwned = el.classList.contains('owned');
+      const newOwned = !isOwned;
+
+      // Confirm before unmarking
+      if (isOwned) {
+        const name = el.querySelector('.sname')?.textContent?.trim() || id;
+        if (!confirm(`¿Quitar ${id} (${name}) de tu colección?`)) return;
+      }
+
       await fetch('/api/sticker', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, owned: newOwned }),
@@ -560,7 +576,7 @@ const allSections = [
       if (!q) { container.innerHTML = ''; return; }
       const matches = allStickersList.filter(s => s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)).slice(0, 15);
       container.innerHTML = matches.map(s =>
-        `<div data-add-id="${s.id}" style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.4rem;border-radius:8px;cursor:pointer;color:#e2e8f0">
+        `<div data-add-id="${s.id}" style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.4rem;border-radius:8px;cursor:pointer;color:#1e293b">
           <span style="font-weight:700;color:#38bdf8;min-width:52px;font-size:0.75rem">${s.id}</span>
           <span style="font-size:0.85rem">${s.name}</span>
         </div>`
