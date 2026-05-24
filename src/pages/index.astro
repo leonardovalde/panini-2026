@@ -368,7 +368,7 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
         const missing = sec.stickers.filter(s => !ownedSet.has(s.id));
         if (!missing.length) return null;
         return (
-          <div class="section collapsed">
+          <div class="section">
             <div class="section-header" data-toggle-list>
               <span class="section-flag">{sec.flag}</span>
               <h2>{sec.name}</h2>
@@ -394,7 +394,7 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
         const reps = sec.stickers.filter(s => (repeatedMap.get(s.id) ?? 0) > 0);
         if (!reps.length) return null;
         return (
-          <div class="section collapsed">
+          <div class="section">
             <div class="section-header" data-toggle-list>
               <span class="section-flag">{sec.flag}</span>
               <h2>{sec.name}</h2>
