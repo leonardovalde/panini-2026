@@ -38,6 +38,30 @@ const allSections = [
   const pct = Math.round(owned / s.stickers.length * 100);
   return { ...s, owned, total: s.stickers.length, pct };
 }).sort((a, b) => a.pct - b.pct);
+
+// precompute lists for export
+const sectionsForList = [
+  { code: 'FWC', name: 'FWC', flag: '🏆', stickers: [...INTRO, ...FIFA_MUSEUM] },
+  ...TEAMS.map(t => ({ code: t.code, name: t.code, flag: t.flag, stickers: t.stickers })),
+  { code: 'CC', name: 'CC', flag: '🥤', stickers: COCA_COLA },
+];
+
+function buildList(filterFn: (id: string) => boolean) {
+  return sectionsForList
+    .map(s => {
+      const nums = s.stickers.filter(st => filterFn(st.id)).map(st => {
+        const m = st.id.match(/\d+$/);
+        return m ? m[0] : st.id;
+      });
+      if (!nums.length) return '';
+      return `${s.name} ${s.flag}: ${nums.join(', ')}`;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+const missingList = buildList(id => !ownedSet.has(id));
+const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
 ---
 
 <html lang="es">
@@ -130,6 +154,16 @@ const allSections = [
     .search-result .sr-id { font-weight: 700; min-width: 52px; font-size: 0.75rem; }
     .search-empty { font-size: 0.8rem; color: #475569; text-align: center; padding: 1rem; }
 
+    /* lists view */
+    #view-lists { display: none; padding: 0.75rem; }
+    #view-lists.visible { display: block; }
+    .list-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .list-tab { flex: 1; padding: 0.5rem; text-align: center; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1.5px solid #cbd5e0; color: #64748b; background: #fff; }
+    .list-tab.active { background: #1e293b; color: #fff; border-color: #1e293b; }
+    .list-export { width: 100%; padding: 0.5rem; background: #fff; border: 1.5px solid #cbd5e0; border-radius: 8px; font-size: 0.8rem; color: #1e293b; cursor: pointer; margin-bottom: 0.75rem; }
+    .list-export:active { background: #f1f5f9; }
+    .list-output { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem; font-size: 0.72rem; font-family: monospace; white-space: pre-wrap; color: #1e293b; max-height: 60vh; overflow-y: auto; line-height: 1.6; }
+
     /* repeated view */
     #view-repeated { display: none; padding: 0.75rem; }
     #view-repeated.visible { display: block; }
@@ -206,6 +240,7 @@ const allSections = [
     <div class="drawer-title">Menú</div>
     <div class="drawer-item active" data-tab="stickers"><iconify-icon icon="mdi:sticker-outline" width="18"></iconify-icon> Stickers</div>
     <div class="drawer-item" data-tab="heatmap"><iconify-icon icon="mdi:chart-bar" width="18"></iconify-icon> Por país</div>
+    <div class="drawer-item" data-tab="lists">📋 Listas</div>
     <!--<div class="drawer-item" data-tab="repeated">🔄 Repetidas</div>-->
     <div class="drawer-item" data-tab="scan"><iconify-icon icon="mdi:camera-outline" width="18"></iconify-icon> Escanear</div>
   </div>
@@ -319,6 +354,18 @@ const allSections = [
     </main>
   </div>
 
+  <!-- LISTS VIEW -->
+  <div id="view-lists">
+    <div class="list-tabs">
+      <div class="list-tab active" id="lt-missing" data-list="missing">Faltantes</div>
+      <div class="list-tab" id="lt-repeated" data-list="repeated">Repetidas</div>
+    </div>
+    <button class="list-export" id="list-export-btn"><iconify-icon icon="mdi:content-copy" width="14"></iconify-icon> Copiar lista</button>
+    <div class="list-output" id="list-output">{missingList || 'No hay faltantes 🎉'}</div>
+    <div id="list-data-missing" style="display:none">{missingList || 'No hay faltantes 🎉'}</div>
+    <div id="list-data-repeated" style="display:none">{repeatedList || 'No hay repetidas'}</div>
+  </div>
+
   <!-- REPEATED VIEW -->
   <div id="view-repeated">
     <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
@@ -406,6 +453,7 @@ const allSections = [
       document.getElementById('view-heatmap').classList.toggle('hidden', tab !== 'heatmap');
       document.getElementById('view-heatmap').classList.toggle('visible', tab === 'heatmap');
       document.getElementById('view-repeated').classList.toggle('visible', tab === 'repeated');
+      document.getElementById('view-lists').classList.toggle('visible', tab === 'lists');
       document.getElementById('view-scan').classList.toggle('visible', tab === 'scan');
       document.querySelectorAll('.drawer-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
       drawer.classList.remove('open'); overlay.classList.remove('open');
@@ -665,6 +713,24 @@ const allSections = [
           document.getElementById('rep-add-search').value = '';
           container.innerHTML = '';
         });
+      });
+    });
+
+    // LISTS
+    let currentList = 'missing';
+    document.querySelectorAll('.list-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        currentList = tab.dataset.list;
+        document.querySelectorAll('.list-tab').forEach(t => t.classList.toggle('active', t.dataset.list === currentList));
+        document.getElementById('list-output').textContent = document.getElementById(`list-data-${currentList}`).textContent;
+      });
+    });
+    document.getElementById('list-export-btn').addEventListener('click', () => {
+      const text = document.getElementById('list-output').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('list-export-btn');
+        btn.textContent = '✓ Copiado!';
+        setTimeout(() => btn.innerHTML = '<iconify-icon icon="mdi:content-copy" width="14"></iconify-icon> Copiar lista', 1500);
       });
     });
 
