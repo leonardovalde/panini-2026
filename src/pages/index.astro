@@ -899,27 +899,30 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
         const canvas = document.getElementById('scan-canvas');
         
         function drawBoxes() {
-          const natW = img.naturalWidth;
-          const natH = img.naturalHeight;
-          if (!natW || !natH) return;
-          canvas.width = natW;
-          canvas.height = natH;
+          const dispW = img.naturalWidth || img.clientWidth;
+          const dispH = img.naturalHeight || img.clientHeight;
+          canvas.width = dispW;
+          canvas.height = dispH;
           const ctx = canvas.getContext('2d');
-          ctx.clearRect(0, 0, natW, natH);
+          ctx.clearRect(0, 0, dispW, dispH);
+
+          // Scale factor: Vision coords are relative to the image the server processed
+          const scaleX = data.imgWidth ? dispW / data.imgWidth : 1;
+          const scaleY = data.imgHeight ? dispH / data.imgHeight : 1;
 
           data.annotations.forEach(ann => {
             if (!ann.box || ann.box.length < 4) return;
             const isOwned = data.owned.includes(ann.code);
             ctx.strokeStyle = isOwned ? '#22c55e' : '#f87171';
-            ctx.lineWidth = Math.max(2, natW / 200);
+            ctx.lineWidth = Math.max(2, dispW / 200);
             ctx.beginPath();
-            ctx.moveTo(ann.box[0].x, ann.box[0].y);
-            for (let i = 1; i < ann.box.length; i++) ctx.lineTo(ann.box[i].x, ann.box[i].y);
+            ctx.moveTo(ann.box[0].x * scaleX, ann.box[0].y * scaleY);
+            for (let i = 1; i < ann.box.length; i++) ctx.lineTo(ann.box[i].x * scaleX, ann.box[i].y * scaleY);
             ctx.closePath();
             ctx.stroke();
-            ctx.font = `bold ${Math.max(14, natW / 25)}px sans-serif`;
+            ctx.font = `bold ${Math.max(14, dispW / 25)}px sans-serif`;
             ctx.fillStyle = isOwned ? '#22c55e' : '#f87171';
-            ctx.fillText(ann.code, ann.box[0].x, ann.box[0].y - 6);
+            ctx.fillText(ann.code, ann.box[0].x * scaleX, ann.box[0].y * scaleY - 6);
           });
         }
 

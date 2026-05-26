@@ -21,9 +21,14 @@ export const POST: APIRoute = async ({ request }) => {
   writeFileSync(inputPath, Buffer.from(buffer));
 
   let base64: string;
+  let imgWidth = 0, imgHeight = 0;
   try {
-    // Use sips (macOS) or fallback to direct base64
     execSync(`sips -s format jpeg "${inputPath}" --out "${outputPath}" 2>/dev/null || cp "${inputPath}" "${outputPath}"`);
+    try {
+      const info = execSync(`sips -g pixelWidth -g pixelHeight "${outputPath}" 2>/dev/null`).toString();
+      imgWidth = parseInt(info.match(/pixelWidth:\s*(\d+)/)?.[1] ?? '0');
+      imgHeight = parseInt(info.match(/pixelHeight:\s*(\d+)/)?.[1] ?? '0');
+    } catch {}
     base64 = readFileSync(outputPath).toString('base64');
   } finally {
     try { unlinkSync(inputPath); unlinkSync(outputPath); } catch {}
@@ -103,7 +108,7 @@ export const POST: APIRoute = async ({ request }) => {
   const newOnes = codes.filter(c => found.get(c) === false);
   const unknown = codes.filter(c => !found.has(c));
 
-  return new Response(JSON.stringify({ codes, owned, new: newOnes, unknown, annotations: annotationsWithBoxes }), {
+  return new Response(JSON.stringify({ codes, owned, new: newOnes, unknown, annotations: annotationsWithBoxes, imgWidth, imgHeight }), {
     headers: { 'Content-Type': 'application/json' },
   });
 };
