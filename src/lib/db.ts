@@ -12,6 +12,7 @@ export function getPool() {
 export async function initDB() {
   const client = await getPool().connect();
   try {
+    await client.query('SET search_path = public');
     await client.query(`
       CREATE TABLE IF NOT EXISTS stickers (
         id TEXT PRIMARY KEY,
@@ -19,7 +20,6 @@ export async function initDB() {
         repeated INTEGER NOT NULL DEFAULT 0
       );
     `);
-    // Add repeated column if missing (migration)
     await client.query(`ALTER TABLE stickers ADD COLUMN IF NOT EXISTS repeated INTEGER NOT NULL DEFAULT 0`);
     const { rows } = await client.query('SELECT COUNT(*) FROM stickers');
     if (parseInt(rows[0].count) === 0) {
