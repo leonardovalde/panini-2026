@@ -45,29 +45,48 @@ export const POST: APIRoute = async ({ request }) => {
   );
 
   const visionData = await visionRes.json();
-  console.log('Vision full response:', JSON.stringify(visionData));
   const rawText: string = visionData.responses?.[0]?.fullTextAnnotation?.text ?? '';
-  console.log('Vision raw text:', JSON.stringify(rawText));
-  console.log('Vision error:', JSON.stringify(visionData.responses?.[0]?.error ?? 'none'));
 
-  // Return raw vision data for debugging
   if (!rawText) {
     return new Response(JSON.stringify({ 
       codes: [], owned: [], missing: [], rawText: '',
-      debug: visionData.responses?.[0]
+      debug: visionData.responses?.[0], annotations: []
     }), { headers: { 'Content-Type': 'application/json' } });
   }
 
-  // Extract sticker codes: 2-3 uppercase letters + optional space + 1-2 digits
-  // Handles both "ARG17" and "KSA 2" and "TUN 16"
-  const codes = [...new Set(
-    [...rawText.matchAll(/\b([A-Z]{2,3})\s?(\d{1,2})\b/g)]
-      .map(m => `${m[1]}${m[2]}`)
-      .filter(c => c.length >= 3)
-  )];
+  // Get individual text annotations with bounding boxes
+  const textAnnotations = visionData.responses?.[0]?.textAnnotations ?? [];
+
+  // Extract sticker codes with their bounding boxes
+  const codeRegex = /^([A-Z]{2,3})\s?(\d{1,2})$/;
+  const annotationsWithBoxes: { code: string; box: any }[] = [];
+  
+  for (const ann of textAnnotations.slice(1)) { // skip first (full text)
+    const text = ann.description?.trim();
+    if (!text) continue;
+    const match = text.match(codeRegex);
+    if (match) {
+      annotationsWithBoxes.push({ code: `${match[1]}${match[2]}`, box: ann.boundingPoly?.vertices });
+    }
+  }
+
+  // Also try combining adjacent annotations (e.g. "KSA" + "2")
+  for (let i = 0; i < textAnnotations.length - 1; i++) {
+    const a = textAnnotations[i]?.description?.trim();
+    const b = textAnnotations[i + 1]?.description?.trim();
+    if (a && b && /^[A-Z]{2,3}$/.test(a) && /^\d{1,2}$/.test(b)) {
+      const code = `${a}${b}`;
+      const box = textAnnotations[i].boundingPoly?.vertices;
+      if (!annotationsWithBoxes.find(x => x.code === code)) {
+        annotationsWithBoxes.push({ code, box });
+      }
+    }
+  }
+
+  const codes = [...new Set(annotationsWithBoxes.map(a => a.code))];
 
   if (!codes.length) {
-    return new Response(JSON.stringify({ codes: [], owned: [], missing: [], rawText }), {
+    return new Response(JSON.stringify({ codes: [], owned: [], missing: [], rawText, annotations: [] }), {
       headers: { 'Content-Type': 'application/json' },
     });
   }
@@ -84,7 +103,7 @@ export const POST: APIRoute = async ({ request }) => {
   const newOnes = codes.filter(c => found.get(c) === false);
   const unknown = codes.filter(c => !found.has(c));
 
-  return new Response(JSON.stringify({ codes, owned, new: newOnes, unknown }), {
+  return new Response(JSON.stringify({ codes, owned, new: newOnes, unknown, annotations: annotationsWithBoxes }), {
     headers: { 'Content-Type': 'application/json' },
   });
 };
