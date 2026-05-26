@@ -100,17 +100,19 @@ export const TEAMS: Team[] = [
 
 export const COCA_COLA: Sticker[] = [
   { id: 'CC1', name: 'Lamine Yamal - España' },
-  { id: 'CC2', name: 'Joshua Kimmich - Alemania' },
-  { id: 'CC3', name: 'Virgil van Dijk - Países Bajos' },
-  { id: 'CC4', name: 'Antonee Robinson - USA' },
-  { id: 'CC5', name: 'Alphonso Davies - Canadá' },
-  { id: 'CC6', name: 'Lautaro Martínez - Argentina' },
-  { id: 'CC7', name: 'Harry Kane - Inglaterra' },
-  { id: 'CC8', name: 'Edson Álvarez - México' },
-  { id: 'CC9', name: 'Weston McKennie - USA' },
+  { id: 'CC2', name: 'Santiago Giménez - México' },
+  { id: 'CC3', name: 'Harry Kane - Inglaterra' },
+  { id: 'CC4', name: 'Joshua Kimmich - Alemania' },
+  { id: 'CC5', name: 'Joško Gvardiol - Croacia' },
+  { id: 'CC6', name: 'Federico Valverde - Uruguay' },
+  { id: 'CC7', name: 'Raúl Jiménez - México' },
+  { id: 'CC8', name: 'Virgil van Dijk - Países Bajos' },
+  { id: 'CC9', name: 'Lautaro Martínez - Argentina' },
   { id: 'CC10', name: 'Jefferson Lerma - Colombia' },
-  { id: 'CC11', name: 'Santiago Giménez - México' },
-  { id: 'CC12', name: 'Gabriel Magalhães - Brasil' },
+  { id: 'CC11', name: 'Enner Valencia - Ecuador' },
+  { id: 'CC12', name: 'Emiliano Martínez - Argentina' },
+  { id: 'CC13', name: 'Alphonso Davies - Canadá' },
+  { id: 'CC14', name: 'Gabriel Magalhães - Brasil' },
 ];
 
 
