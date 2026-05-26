@@ -19,8 +19,14 @@ export const POST: APIRoute = async ({ request }) => {
   writeFileSync(inputPath, Buffer.from(buffer));
 
   let base64: string;
+  let imgWidth = 0, imgHeight = 0;
   try {
     execSync(`sips -s format jpeg "${inputPath}" --out "${outputPath}" 2>/dev/null || cp "${inputPath}" "${outputPath}"`);
+    try {
+      const info = execSync(`sips -g pixelWidth -g pixelHeight "${outputPath}" 2>/dev/null`).toString();
+      imgWidth = parseInt(info.match(/pixelWidth:\s*(\d+)/)?.[1] ?? '0');
+      imgHeight = parseInt(info.match(/pixelHeight:\s*(\d+)/)?.[1] ?? '0');
+    } catch {}
     base64 = readFileSync(outputPath).toString('base64');
   } finally {
     try { unlinkSync(inputPath); unlinkSync(outputPath); } catch {}
@@ -33,7 +39,28 @@ export const POST: APIRoute = async ({ request }) => {
   const visionData = await visionRes.json();
   const rawText: string = visionData.responses?.[0]?.fullTextAnnotation?.text ?? '';
 
-  if (!rawText) return new Response(JSON.stringify({ codes: [], added: [] }), { headers: { 'Content-Type': 'application/json' } });
+  if (!rawText) return new Response(JSON.stringify({ codes: [], added: [], annotations: [], imgWidth, imgHeight }), { headers: { 'Content-Type': 'application/json' } });
+
+  // Get annotations with bounding boxes
+  const textAnnotations = visionData.responses?.[0]?.textAnnotations ?? [];
+  const codeRegex = /^([A-Z]{2,3})\s?(\d{1,2})$/;
+  const annotationsWithBoxes: { code: string; box: any }[] = [];
+  for (const ann of textAnnotations.slice(1)) {
+    const text = ann.description?.trim();
+    if (!text) continue;
+    const match = text.match(codeRegex);
+    if (match) annotationsWithBoxes.push({ code: `${match[1]}${match[2]}`, box: ann.boundingPoly?.vertices });
+  }
+  for (let i = 0; i < textAnnotations.length - 1; i++) {
+    const a = textAnnotations[i]?.description?.trim();
+    const b = textAnnotations[i + 1]?.description?.trim();
+    if (a && b && /^[A-Z]{2,3}$/.test(a) && /^\d{1,2}$/.test(b)) {
+      const code = `${a}${b}`;
+      if (!annotationsWithBoxes.find(x => x.code === code)) {
+        annotationsWithBoxes.push({ code, box: textAnnotations[i].boundingPoly?.vertices });
+      }
+    }
+  }
 
   // Count occurrences of each code (not unique — if SEN3 appears twice, add 2)
   const allCodes = [...rawText.matchAll(/\b([A-Z]{2,3})\s?(\d{1,2})\b/g)].map(m => `${m[1]}${m[2]}`).filter(c => c.length >= 3);
@@ -54,5 +81,5 @@ export const POST: APIRoute = async ({ request }) => {
   const { rows } = await pool.query(`SELECT id, repeated FROM stickers WHERE id IN (${placeholders})`, codes);
   const results = rows.map(r => ({ id: r.id, repeated: r.repeated }));
 
-  return new Response(JSON.stringify({ codes, added: results }), { headers: { 'Content-Type': 'application/json' } });
+  return new Response(JSON.stringify({ codes, added: results, annotations: annotationsWithBoxes, imgWidth, imgHeight }), { headers: { 'Content-Type': 'application/json' } });
 };

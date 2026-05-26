@@ -1008,6 +1008,33 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
           badge.textContent = s.repeated;
         });
       });
+
+      // Draw bounding boxes
+      if (data.annotations?.length) {
+        const img = document.getElementById('scan-preview');
+        const canvas = document.getElementById('scan-canvas');
+        const dispW = img.naturalWidth || img.clientWidth;
+        const dispH = img.naturalHeight || img.clientHeight;
+        canvas.width = dispW;
+        canvas.height = dispH;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, dispW, dispH);
+        const scaleX = data.imgWidth ? dispW / data.imgWidth : 1;
+        const scaleY = data.imgHeight ? dispH / data.imgHeight : 1;
+        data.annotations.forEach(ann => {
+          if (!ann.box || ann.box.length < 4) return;
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = Math.max(2, dispW / 200);
+          ctx.beginPath();
+          ctx.moveTo(ann.box[0].x * scaleX, ann.box[0].y * scaleY);
+          for (let i = 1; i < ann.box.length; i++) ctx.lineTo(ann.box[i].x * scaleX, ann.box[i].y * scaleY);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.font = `bold ${Math.max(14, dispW / 25)}px sans-serif`;
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillText(ann.code, ann.box[0].x * scaleX, ann.box[0].y * scaleY - 6);
+        });
+      }
     });
 
     // RESET REPEATED
