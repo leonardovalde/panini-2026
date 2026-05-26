@@ -545,7 +545,7 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
     });
 
     // SEARCH
-    const allStickers = Array.from(document.querySelectorAll('.sticker')).map(el => ({
+    const allStickers = Array.from(document.querySelectorAll('#view-stickers .sticker')).map(el => ({
       el, id: el.dataset.id, section: el.dataset.section,
       name: el.querySelector('.sname')?.textContent ?? '',
     }));
@@ -768,7 +768,7 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
     });
     addModal.addEventListener('click', e => { if (e.target === addModal) addModal.style.display = 'none'; });
 
-    const allStickersList = Array.from(document.querySelectorAll('.sticker')).map(el => ({
+    const allStickersList = Array.from(document.querySelectorAll('#view-stickers .sticker')).map(el => ({
       id: el.dataset.id,
       name: el.querySelector('.sname')?.textContent?.trim() ?? '',
     }));
