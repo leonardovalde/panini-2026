@@ -479,6 +479,8 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
     <input type="file" id="scan-input-file" accept="image/*" style="display:none" />
     <img id="scan-preview" class="scan-preview visible" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' fill='none'%3E%3Crect width='400' height='200' rx='12' fill='%23f1f5f9'/%3E%3Cpath d='M180 80h40v40h-40z' fill='%23e2e8f0'/%3E%3Ccircle cx='190' cy='90' r='6' fill='%23cbd5e0'/%3E%3Cpath d='M170 120l20-20 15 15 25-30 30 35H170z' fill='%23cbd5e0'/%3E%3Ctext x='200' y='155' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%2394a3b8'%3ETu foto aparecerá aquí%3C/text%3E%3C/svg%3E" alt="preview" />
     <button class="scan-btn" id="scan-btn"><iconify-icon icon="mdi:magnify-scan" width="18"></iconify-icon> Reconocer cartas</button>
+    <button class="scan-btn" id="scan-btn-rep" style="background:#38bdf8;color:#0f172a"><iconify-icon icon="mdi:magnify-scan" width="18"></iconify-icon> Escanear repetidas</button>
+    <button class="scan-btn" id="reset-rep-btn" style="background:#fff;color:#64748b;border:1.5px solid #e2e8f0;display:flex"><iconify-icon icon="mdi:refresh" width="16"></iconify-icon> Reiniciar repetidas</button>
     <div class="scan-results" id="scan-results"></div>
   </div>
 
@@ -824,6 +826,7 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
       }
       preview.classList.add('visible');
       document.getElementById('scan-btn').classList.add('visible');
+      document.getElementById('scan-btn-rep').classList.add('visible');
       document.getElementById('scan-results').innerHTML = '';
     }
 
@@ -909,6 +912,60 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
           if (p) p.innerHTML = `${total} carta${total!==1?'s':''} detectada${total!==1?'s':''} · <span style="color:#4ade80">${owned} ya tenés</span> · <span style="color:#f87171">${missing} nueva${missing!==1?'s':''}</span>`;
         });
       });
+    });
+
+    // SCAN REPEATED
+    document.getElementById('scan-btn-rep').addEventListener('click', async () => {
+      if (!scanFile) return;
+      const results = document.getElementById('scan-results');
+      results.innerHTML = '<div class="scan-loading">⏳ Escaneando repetidas...</div>';
+
+      let fileToSend = scanFile;
+      const bitmap = await createImageBitmap(scanFile).catch(() => null);
+      if (bitmap) {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+        canvas.width = Math.round(bitmap.width * scale);
+        canvas.height = Math.round(bitmap.height * scale);
+        canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        fileToSend = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
+      }
+
+      const form = new FormData();
+      form.append('image', fileToSend);
+      const res = await fetch('/api/scan-repeated', { method: 'POST', body: form });
+      const data = await res.json();
+      if (!data.codes?.length) { results.innerHTML = '<div class="scan-loading">No se detectaron códigos</div>'; return; }
+
+      results.innerHTML = `
+        <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">
+          ${data.added.length} repetidas agregadas
+        </p>
+        <div class="scan-grid">
+          ${data.added.map(s => {
+            const el = document.querySelector(`.sticker[data-id="${s.id}"]`);
+            const name = el?.querySelector('.sname')?.textContent?.trim() || s.id;
+            return `<div class="scan-card owned"><div class="sc-code">${s.id}</div><div class="sc-name">${name} x${s.repeated}</div></div>`;
+          }).join('')}
+        </div>
+      `;
+
+      // Update badges
+      data.added.forEach(s => {
+        document.querySelectorAll(`.sticker[data-id="${s.id}"]`).forEach(sticker => {
+          let badge = sticker.querySelector('.rbadge');
+          if (!badge) { badge = document.createElement('span'); badge.className = 'rbadge'; sticker.appendChild(badge); }
+          badge.textContent = s.repeated;
+        });
+      });
+    });
+
+    // RESET REPEATED
+    document.getElementById('reset-rep-btn').addEventListener('click', async () => {
+      if (!confirm('¿Reiniciar TODAS las repetidas a 0?')) return;
+      await fetch('/api/reset-repeated', { method: 'POST' });
+      document.querySelectorAll('.rbadge').forEach(b => b.remove());
+      alert('Repetidas reiniciadas');
     });
   </script>
   </div><!-- .app -->
