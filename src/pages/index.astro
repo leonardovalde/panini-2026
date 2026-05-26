@@ -897,28 +897,34 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
       if (data.annotations?.length) {
         const img = document.getElementById('scan-preview');
         const canvas = document.getElementById('scan-canvas');
-        const natW = img.naturalWidth || img.width;
-        const natH = img.naturalHeight || img.height;
-        canvas.width = natW;
-        canvas.height = natH;
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, natW, natH);
+        
+        function drawBoxes() {
+          const natW = img.naturalWidth;
+          const natH = img.naturalHeight;
+          if (!natW || !natH) return;
+          canvas.width = natW;
+          canvas.height = natH;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, natW, natH);
 
-        data.annotations.forEach(ann => {
-          if (!ann.box || ann.box.length < 4) return;
-          const isOwned = data.owned.includes(ann.code);
-          ctx.strokeStyle = isOwned ? '#22c55e' : '#f87171';
-          ctx.lineWidth = Math.max(2, natW / 200);
-          ctx.beginPath();
-          ctx.moveTo(ann.box[0].x, ann.box[0].y);
-          for (let i = 1; i < ann.box.length; i++) ctx.lineTo(ann.box[i].x, ann.box[i].y);
-          ctx.closePath();
-          ctx.stroke();
-          // label
-          ctx.font = `bold ${Math.max(12, natW / 30)}px sans-serif`;
-          ctx.fillStyle = isOwned ? '#22c55e' : '#f87171';
-          ctx.fillText(ann.code, ann.box[0].x, ann.box[0].y - 4);
-        });
+          data.annotations.forEach(ann => {
+            if (!ann.box || ann.box.length < 4) return;
+            const isOwned = data.owned.includes(ann.code);
+            ctx.strokeStyle = isOwned ? '#22c55e' : '#f87171';
+            ctx.lineWidth = Math.max(2, natW / 200);
+            ctx.beginPath();
+            ctx.moveTo(ann.box[0].x, ann.box[0].y);
+            for (let i = 1; i < ann.box.length; i++) ctx.lineTo(ann.box[i].x, ann.box[i].y);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.font = `bold ${Math.max(14, natW / 25)}px sans-serif`;
+            ctx.fillStyle = isOwned ? '#22c55e' : '#f87171';
+            ctx.fillText(ann.code, ann.box[0].x, ann.box[0].y - 6);
+          });
+        }
+
+        if (img.complete) drawBoxes();
+        else img.onload = drawBoxes;
       }
 
       // Click to mark missing stickers
