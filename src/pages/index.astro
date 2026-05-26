@@ -267,6 +267,7 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
             <div class={`sticker foil ${ownedSet.has(s.id) ? 'owned' : 'missing'}`} data-id={s.id} data-section="intro" title={`${s.id} - ${s.name}`}>
               <span class="sid">{s.id}</span>
               <span class="sname">{s.name}</span>
+              {repBadge(s.id) > 0 && <span class="rbadge">{repBadge(s.id)}</span>}
             </div>
           ))}
         </div>
@@ -310,6 +311,7 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
             <div class={`sticker foil ${ownedSet.has(s.id) ? 'owned' : 'missing'}`} data-id={s.id} data-section="museum" title={`${s.id} - ${s.name}`}>
               <span class="sid">{s.id}</span>
               <span class="sname">{s.name}</span>
+              {repBadge(s.id) > 0 && <span class="rbadge">{repBadge(s.id)}</span>}
             </div>
           ))}
         </div>
@@ -327,6 +329,7 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
             <div class={`sticker ${ownedSet.has(s.id) ? 'owned' : 'missing'}`} data-id={s.id} data-section="cocacola" title={`${s.id} - ${s.name}`}>
               <span class="sid">{s.id}</span>
               <span class="sname">{s.name}</span>
+              {repBadge(s.id) > 0 && <span class="rbadge">{repBadge(s.id)}</span>}
             </div>
           ))}
         </div>
