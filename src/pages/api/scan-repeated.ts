@@ -79,7 +79,7 @@ export const POST: APIRoute = async ({ request }) => {
   // Get updated counts
   const placeholders = codes.map((_, i) => `$${i + 1}`).join(',');
   const { rows } = await pool.query(`SELECT id, repeated FROM stickers WHERE id IN (${placeholders})`, codes);
-  const results = rows.map(r => ({ id: r.id, repeated: r.repeated }));
+  const results = rows.map(r => ({ id: r.id, repeated: r.repeated, found: codeCounts.get(r.id) ?? 1 }));
 
   return new Response(JSON.stringify({ codes, added: results, annotations: annotationsWithBoxes, imgWidth, imgHeight }), { headers: { 'Content-Type': 'application/json' } });
 };

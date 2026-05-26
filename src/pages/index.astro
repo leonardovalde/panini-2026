@@ -987,15 +987,16 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
       const data = await res.json();
       if (!data.codes?.length) { results.innerHTML = '<div class="scan-loading">No se detectaron códigos</div>'; return; }
 
+      const totalFound = data.added.reduce((sum, s) => sum + (s.found || 1), 0);
       results.innerHTML = `
         <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">
-          ${data.added.length} repetidas agregadas
+          ${totalFound} carta${totalFound !== 1 ? 's' : ''} detectada${totalFound !== 1 ? 's' : ''} · ${data.added.length} código${data.added.length !== 1 ? 's' : ''} único${data.added.length !== 1 ? 's' : ''}
         </p>
         <div class="scan-grid">
           ${data.added.map(s => {
             const el = document.querySelector(`.sticker[data-id="${s.id}"]`);
             const name = el?.querySelector('.sname')?.textContent?.trim() || s.id;
-            return `<div class="scan-card owned"><div class="sc-code">${s.id}</div><div class="sc-name">${name} x${s.repeated}</div></div>`;
+            return `<div class="scan-card owned"><div class="sc-code">${s.id}${s.found > 1 ? ` (×${s.found})` : ''}</div><div class="sc-name">${name} · total: ${s.repeated}</div></div>`;
           }).join('')}
         </div>
       `;
