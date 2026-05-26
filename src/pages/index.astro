@@ -647,15 +647,14 @@ const repeatedList = buildList(id => (repeatedMap.get(id) ?? 0) > 0);
         body: JSON.stringify({ id, delta }),
       });
       const { repeated } = await res.json();
-      // update badge on sticker
-      const sticker = document.querySelector(`.sticker[data-id="${id}"]`);
-      if (sticker) {
+      // update badge on ALL stickers with this id (main + lists views)
+      document.querySelectorAll(`.sticker[data-id="${id}"]`).forEach(sticker => {
         let badge = sticker.querySelector('.rbadge');
         if (repeated > 0) {
-          if (!badge) { badge = document.createElement('span'); badge.className = 'rbadge'; badge.id = `rbadge-${id}`; sticker.appendChild(badge); }
+          if (!badge) { badge = document.createElement('span'); badge.className = 'rbadge'; sticker.appendChild(badge); }
           badge.textContent = repeated;
         } else if (badge) { badge.remove(); }
-      }
+      });
       // update repeated view row
       const row = document.querySelector(`[data-rep-id="${id}"]`);
       const cnt = document.getElementById(`rc-${id}`);
