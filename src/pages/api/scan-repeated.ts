@@ -35,16 +35,23 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (!rawText) return new Response(JSON.stringify({ codes: [], added: [] }), { headers: { 'Content-Type': 'application/json' } });
 
-  const codes = [...new Set([...rawText.matchAll(/\b([A-Z]{2,3})\s?(\d{1,2})\b/g)].map(m => `${m[1]}${m[2]}`).filter(c => c.length >= 3))];
+  // Count occurrences of each code (not unique — if SEN3 appears twice, add 2)
+  const allCodes = [...rawText.matchAll(/\b([A-Z]{2,3})\s?(\d{1,2})\b/g)].map(m => `${m[1]}${m[2]}`).filter(c => c.length >= 3);
+  const codeCounts = new Map<string, number>();
+  allCodes.forEach(c => codeCounts.set(c, (codeCounts.get(c) ?? 0) + 1));
+  const codes = [...codeCounts.keys()];
 
   if (!codes.length) return new Response(JSON.stringify({ codes: [], added: [] }), { headers: { 'Content-Type': 'application/json' } });
 
-  // Increment repeated for all detected codes
-  const placeholders = codes.map((_, i) => `$${i + 1}`).join(',');
-  await getPool().query(`UPDATE stickers SET repeated = repeated + 1 WHERE id IN (${placeholders})`, codes);
+  // Increment repeated for each code by its occurrence count
+  const pool = getPool();
+  for (const [code, count] of codeCounts) {
+    await pool.query('UPDATE stickers SET repeated = repeated + $1 WHERE id = $2', [count, code]);
+  }
 
   // Get updated counts
-  const { rows } = await getPool().query(`SELECT id, repeated FROM stickers WHERE id IN (${placeholders})`, codes);
+  const placeholders = codes.map((_, i) => `$${i + 1}`).join(',');
+  const { rows } = await pool.query(`SELECT id, repeated FROM stickers WHERE id IN (${placeholders})`, codes);
   const results = rows.map(r => ({ id: r.id, repeated: r.repeated }));
 
   return new Response(JSON.stringify({ codes, added: results }), { headers: { 'Content-Type': 'application/json' } });
